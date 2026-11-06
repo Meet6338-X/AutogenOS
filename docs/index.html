@@ -4,281 +4,439 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AutogenOS — Autonomous Multi-Agent Operating System Framework</title>
-  <meta name="description" content="Recursive Self-Improving OS-Control Agent Swarm with Sub-500ms Real-Time Voice, Tool Attention, and Deterministic Causal Grounding.">
+  <meta name="description" content="Recursive Self-Improving OS-Control Agent Swarm with Sub-500ms Real-Time Voice, Dynamic Tool Attention, and Deterministic Causal Grounding.">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Background Particle Network -->
-  <canvas id="particle-canvas"></canvas>
+  <!-- Precision Ambient Grid & Cursor Illumination -->
+  <div class="ambient-grid"></div>
+  <div class="ambient-glow"></div>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <a href="#" class="nav-brand">
-      <img src="assets/logo.png" alt="AutogenOS Logo">
-      <span>AutogenOS</span>
-    </a>
-    <ul class="nav-links">
-      <li><a href="#overview">Overview</a></li>
-      <li><a href="#tool-attention">Tool Attention</a></li>
-      <li><a href="#voice-pipeline">Local Voice</a></li>
-      <li><a href="#papers">Research Papers</a></li>
-      <li><a href="#playground">Playground</a></li>
-    </ul>
-    <div class="nav-actions">
-      <a href="https://github.com/autogenos/autogenos" class="btn btn-secondary" target="_blank">GitHub</a>
-      <a href="#playground" class="btn btn-primary">Get Started</a>
-    </div>
-  </nav>
+  <!-- Precision Navigation Bar -->
+  <header class="navbar">
+    <div class="container">
+      <a href="#" class="nav-brand">
+        <img src="assets/logo.png" alt="AutogenOS Logo" class="brand-emblem">
+        <span class="brand-name">AutogenOS</span>
+        <span class="brand-badge">v0.1.0</span>
+      </a>
 
-  <!-- Hero Section -->
-  <header class="hero" id="overview">
-    <div class="hero-badge">
-      <span>⚡ v0.1.0 • 100% Free & Local • Autonomous OS-Control Swarm</span>
-    </div>
-    <img src="assets/logo.png" alt="AutogenOS 3D Logo" class="hero-logo-img">
-    <h1>The Operating System for <span>Autonomous Multi-Agent Swarms</span></h1>
-    <p>
-      Recursive Self-Improving AI agents executing across Windows, Linux, and macOS with sub-500ms real-time voice, pure CDP browser automation, dynamic Tool Attention, and deterministic causal verification.
-    </p>
+      <ul class="nav-links">
+        <li><a href="#cockpit" class="nav-link">Orchestration</a></li>
+        <li><a href="#tool-attention" class="nav-link">Tool Attention</a></li>
+        <li><a href="#voice-pipeline" class="nav-link">Local Voice</a></li>
+        <li><a href="#papers" class="nav-link">Whitepapers</a></li>
+        <li><a href="#developers" class="nav-link">Developers</a></li>
+      </ul>
 
-    <div class="hero-cta">
-      <a href="#playground" class="btn btn-primary">Start Building Free</a>
-      <a href="#papers" class="btn btn-secondary">Read 5 Whitepapers</a>
-    </div>
-
-    <!-- Live Animated Terminal Window -->
-    <div class="terminal-window">
-      <div class="terminal-header">
-        <div class="terminal-dots">
-          <span class="dot dot-red"></span>
-          <span class="dot dot-yellow"></span>
-          <span class="dot dot-green"></span>
-        </div>
-        <div class="terminal-title">autogenos-node — zsh — 80x24</div>
-        <div style="width: 40px;"></div>
-      </div>
-      <div class="terminal-body" id="terminal-typing-area">
-        <!-- Live typing injected via app.js -->
+      <div class="nav-actions">
+        <a href="https://github.com/Meet6338-X/AutogenOS" class="btn btn-secondary" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+          GitHub
+        </a>
+        <a href="#developers" class="btn btn-primary">Get Started</a>
       </div>
     </div>
   </header>
 
-  <!-- Stats Counter Bar -->
-  <section class="stats-bar">
-    <div class="stat-card">
-      <div class="stat-value">~11 µs</div>
-      <div class="stat-label">Bifrost Gateway Overhead (727x faster than LiteLLM)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">91.6%</div>
-      <div class="stat-label">Token Overhead Reduction via Tool Attention</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">&lt; 370 ms</div>
-      <div class="stat-label">Time-To-First-Audio (TTFA) Real-Time Voice</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">78.9%</div>
-      <div class="stat-label">OSWorld-Verified SOTA Success Rate</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">100% Free</div>
-      <div class="stat-label">Completely Local & Offline (0 Cloud Keys)</div>
-    </div>
-  </section>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill-badge">
+        <span class="pulse-indicator"></span>
+        <span>Operational • 100% Free & Fully Offline Capable</span>
+      </div>
 
-  <!-- Interactive Tool Attention vs MCP Tax Calculator -->
-  <section class="interactive-section" id="tool-attention">
-    <div class="section-header">
-      <div class="section-tag">Project I • High-Speed Execution</div>
-      <h2 class="section-title">Eliminating the Model Context Protocol Tax</h2>
-      <p class="section-desc">
-        Injecting hundreds of eager JSON schemas consumes up to 51% of context windows. Tool Attention uses dense semantic cosine similarity to promote schemas lazily.
+      <h1 class="hero-title">
+        The Autonomous Multi-Agent<br>
+        <span class="gradient-text">Operating System.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        A massively parallel swarm framework executing deterministic cross-platform desktop control, sub-500ms continuous voice over WebRTC, and recursive self-improvement without parameter retraining.
       </p>
-    </div>
 
-    <div class="calc-container">
-      <div class="calc-controls">
-        <div class="calc-control-group">
-          <label>
-            <span>Total Registered Tools in Ecosystem:</span>
-            <span id="val-tool-count" style="color:var(--accent-cyan)">100</span>
-          </label>
-          <input type="range" id="slider-tool-count" class="calc-slider" min="10" max="500" value="100" step="10">
-        </div>
-
-        <div class="calc-control-group">
-          <label>
-            <span>Promoted Tools per Turn (Top-k):</span>
-            <span id="val-top-k" style="color:var(--accent-purple)">3</span>
-          </label>
-          <input type="range" id="slider-top-k" class="calc-slider" min="1" max="10" value="3" step="1">
-        </div>
-
-        <div style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-top: 1.5rem;">
-          💡 <strong>How it works:</strong> Naive MCP injects ~450 tokens of full JSON schema per tool eagerly. Tool Attention keeps ~35-token compact metadata vectors and gates only top-k tools exceeding threshold $\tau \ge 0.20$.
-        </div>
+      <div class="hero-cta-group">
+        <a href="#developers" class="btn btn-primary btn-pill">Deploy Swarm Locally</a>
+        <a href="#papers" class="btn btn-secondary btn-pill">Read Academic Papers (5)</a>
       </div>
 
-      <div class="calc-results">
-        <div class="calc-metric-row">
-          <span style="color:var(--text-muted)">Naive MCP Context Cost:</span>
-          <span id="calc-naive-tokens" style="font-weight:700; color:#ef4444">45,000 tokens</span>
-        </div>
-        <div class="calc-metric-row">
-          <span style="color:var(--text-muted)">Tool Attention Cost:</span>
-          <span id="calc-dynamic-tokens" style="font-weight:700; color:var(--accent-cyan)">4,850 tokens</span>
-        </div>
-        <div class="calc-metric-row" style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
-          <span style="font-weight:600">Tokens Saved per Turn:</span>
-          <span id="calc-tokens-saved" class="metric-highlight">40,150 tokens</span>
-        </div>
-        <div>
-          <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-muted)">
-            <span>Context Headroom Preserved:</span>
-            <span id="calc-pct-saved" style="color:var(--accent-emerald); font-weight:700">89.2% saved</span>
+      <div class="install-pill">
+        <span>$</span>
+        <code>pip install autogenos</code>
+        <button id="btn-copy-install" class="copy-button" title="Copy to clipboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </button>
+      </div>
+
+      <!-- Studio Swarm Cockpit Frame -->
+      <div class="cockpit-frame" id="cockpit">
+        <div class="cockpit-header">
+          <div class="cockpit-title">
+            <span class="cockpit-status-dot"></span>
+            <span>SWARM ORCHESTRATOR // SESSION: 9A4F21-B</span>
           </div>
-          <div class="progress-bar-container">
-            <div id="calc-fill-bar" class="progress-bar-fill"></div>
+          <div class="cockpit-presets">
+            <span style="font-size:0.75rem; color:var(--text-tertiary); margin-right:0.4rem;">SCENARIO:</span>
+            <button class="preset-btn active" data-preset="spreadsheets">Spreadsheet Audit</button>
+            <button class="preset-btn" data-preset="windows_ui">Windows Native UI</button>
+            <button class="preset-btn" data-preset="failure_repair">Failure & Repair</button>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Real-Time Voice & Waveform Simulator -->
-  <section class="interactive-section" id="voice-pipeline">
-    <div class="section-header">
-      <div class="section-tag">Project II • System Full Control</div>
-      <h2 class="section-title">Sub-500ms Continuous Voice Pipeline</h2>
-      <p class="section-desc">
-        100% free local LiveKit WebRTC pipeline with ONNX Silero VAD, TurnDetector v1-mini, Dynamic EMA Endpointing, and zero-latency barge-in cancellation.
-      </p>
-    </div>
+        <div class="cockpit-grid">
+          <div class="cockpit-left">
+            <div style="font-size: 0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-tertiary);">
+              Active Execution Topology
+            </div>
+            
+            <div class="swarm-node-list">
+              <!-- Node 1: Planner -->
+              <div class="swarm-node-item active" id="node-planner">
+                <div class="node-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                </div>
+                <div class="node-info">
+                  <div class="node-title-row">
+                    <span class="node-name">Planner Node</span>
+                    <span class="node-status-tag status-active">DECOMPOSING</span>
+                  </div>
+                  <div class="node-desc">Causal DAG Subtask Synthesis & Gating</div>
+                </div>
+              </div>
 
-    <div class="audio-simulator">
-      <div id="voice-status-text" style="margin-bottom: 1rem; font-weight: 600; font-family: var(--font-mono); color: var(--text-muted)">
-        Ready for continuous audio stream.
-      </div>
-      <canvas id="waveform-canvas" width="800" height="120"></canvas>
-      <div class="audio-controls">
-        <button id="btn-sim-speak" class="btn btn-primary">▶ Simulate User Speech Turn</button>
-        <button id="btn-sim-bargein" class="btn btn-secondary" style="border-color: #f43f5e; color: #f43f5e">⚡ Trigger Barge-in Interrupt</button>
-      </div>
-    </div>
-  </section>
+              <!-- Node 2: Actor Alpha -->
+              <div class="swarm-node-item active" id="node-actor-alpha">
+                <div class="node-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                </div>
+                <div class="node-info">
+                  <div class="node-title-row">
+                    <span class="node-name">Actor Alpha (Worktree)</span>
+                    <span class="node-status-tag status-active">ISOLATED</span>
+                  </div>
+                  <div class="node-desc">Branch: swarm/actor-alpha • Single-Pass MCP</div>
+                </div>
+              </div>
 
-  <!-- Academic Whitepapers Showcase -->
-  <section class="interactive-section" id="papers">
-    <div class="section-header">
-      <div class="section-tag">Project III • Academic Foundation</div>
-      <h2 class="section-title">Peer-Reviewed Architecture Whitepapers</h2>
-      <p class="section-desc">
-        Rigorous theoretical formulations and empirical benchmarks proving the recursive self-improvement of autonomous OS-control swarms.
-      </p>
-    </div>
+              <!-- Node 3: Actor Beta -->
+              <div class="swarm-node-item" id="node-actor-beta">
+                <div class="node-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                </div>
+                <div class="node-info">
+                  <div class="node-title-row">
+                    <span class="node-name">Actor Beta (MicroVM)</span>
+                    <span class="node-status-tag">STANDBY</span>
+                  </div>
+                  <div class="node-desc">Firecracker Sandbox (150ms snapshot)</div>
+                </div>
+              </div>
 
-    <div class="papers-grid">
-      <!-- Paper 1 -->
-      <div class="paper-card">
-        <div>
-          <div class="paper-num">WHITEPAPER 01</div>
-          <div class="paper-title">RSIAgent: Recursive Self-Improvement via Broad-then-Deep Exploration</div>
-          <div class="paper-abstract">
-            Formal tripartite multi-agent decomposition (Curriculum, Actor, Verifier) executing autonomous UI exploration during idle compute cycles without parameter retraining.
+              <!-- Node 4: Verifier -->
+              <div class="swarm-node-item active" id="node-verifier">
+                <div class="node-icon" style="color:var(--brand-emerald)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                </div>
+                <div class="node-info">
+                  <div class="node-title-row">
+                    <span class="node-name">Verifier Node</span>
+                    <span class="node-status-tag status-committed">GROUNDED</span>
+                  </div>
+                  <div class="node-desc">Deterministic Environmental Evidence Gate</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cockpit-right">
+            <div style="font-size: 0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.75rem;">
+              Execution Telemetry & State Checkpointer
+            </div>
+            <div class="telemetry-log" id="cockpit-telemetry-log">
+              <!-- Telemetry entries streamed via app.js -->
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-tertiary); font-family:var(--font-mono); border-top:1px solid var(--border-subtle); padding-top:0.75rem; margin-top:1rem; display:flex; justify-content:space-between;">
+              <span>CHECKPOINT: SQLite WAL (Thread-Scoped)</span>
+              <span>TOKEN PRUNING: CarryOn Active</span>
+            </div>
           </div>
         </div>
-        <a href="../papers/01_rsi_agent_broad_deep_exploration.md" class="paper-link" target="_blank">Read Paper (Markdown) →</a>
-      </div>
-
-      <!-- Paper 2 -->
-      <div class="paper-card">
-        <div>
-          <div class="paper-num">WHITEPAPER 02</div>
-          <div class="paper-title">Eliminating the MCP Tax: Dynamic Tool Attention & Lazy Schemas</div>
-          <div class="paper-abstract">
-            Mathematical modeling of cosine semantic tool gating and single-pass Code Execution with MCP, reducing token bloat by up to 95.2%.
-          </div>
-        </div>
-        <a href="../papers/02_eliminating_the_mcp_tax_tool_attention.md" class="paper-link" target="_blank">Read Paper (Markdown) →</a>
-      </div>
-
-      <!-- Paper 3 -->
-      <div class="paper-card">
-        <div>
-          <div class="paper-num">WHITEPAPER 03</div>
-          <div class="paper-title">StructAgent & SolveBind: Deterministic Evidence Gating</div>
-          <div class="paper-abstract">
-            Invariant Planner-Actor-Verifier pipeline requiring raw shell exit codes, file hashes, and accessibility trees to halt generative hallucination.
-          </div>
-        </div>
-        <a href="../papers/03_struct_agent_deterministic_causal_evidence.md" class="paper-link" target="_blank">Read Paper (Markdown) →</a>
-      </div>
-
-      <!-- Paper 4 -->
-      <div class="paper-card">
-        <div>
-          <div class="paper-num">WHITEPAPER 04</div>
-          <div class="paper-title">EchoPath & UI-Evol: Execution-Level Replayable Memory</div>
-          <div class="paper-abstract">
-            Image-Based Target Reaiming (IBTR) converting GUI interactions into 12ms deterministic coordinate schemas with autonomous self-healing critique.
-          </div>
-        </div>
-        <a href="../papers/04_echopath_ui_evol_execution_replay.md" class="paper-link" target="_blank">Read Paper (Markdown) →</a>
-      </div>
-
-      <!-- Paper 5 -->
-      <div class="paper-card">
-        <div>
-          <div class="paper-num">WHITEPAPER 05</div>
-          <div class="paper-title">CarryOn: Object-Oriented Context Compaction & FP8 KV Caching</div>
-          <div class="paper-abstract">
-            Branch folding runtime replacing linear chat histories with active state objects, cutting per-task token consumption by 54.2% without loss of precision.
-          </div>
-        </div>
-        <a href="../papers/05_carryon_object_oriented_context_compaction.md" class="paper-link" target="_blank">Read Paper (Markdown) →</a>
       </div>
     </div>
   </section>
 
-  <!-- Interactive Code & API Playground -->
-  <section class="interactive-section" id="playground">
-    <div class="section-header">
-      <div class="section-tag">Developer Quickstart</div>
-      <h2 class="section-title">Unified Python Library & CLI</h2>
-      <p class="section-desc">
-        Install the package or call the REST/WebSocket API directly in your workflow.
-      </p>
-    </div>
-
-    <div class="code-playground">
-      <div class="code-tabs">
-        <button class="code-tab active" data-tab="python">Python SDK</button>
-        <button class="code-tab" data-tab="cli">Terminal CLI</button>
-        <button class="code-tab" data-tab="api">REST API</button>
-        <button class="code-tab" data-tab="websocket">Real-Time WebSocket</button>
+  <!-- Metrics Ribbon -->
+  <section class="metrics-section">
+    <div class="container">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-stat">~11 <span class="unit">µs</span></div>
+          <div class="metric-label">Bifrost Gateway Overhead</div>
+          <div class="metric-sub">727x faster than Python proxies</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-stat">91.6<span class="unit">%</span></div>
+          <div class="metric-label">Token Overhead Reduction</div>
+          <div class="metric-sub">Dynamic Tool Attention gating</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-stat">&lt; 370 <span class="unit">ms</span></div>
+          <div class="metric-label">Time to First Audio (TTFA)</div>
+          <div class="metric-sub">Silero VAD + TurnDetector v1-mini</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-stat">78.9<span class="unit">%</span></div>
+          <div class="metric-label">OSWorld-Verified Benchmark</div>
+          <div class="metric-sub">State-of-the-art causal verification</div>
+        </div>
       </div>
-      <div class="code-content">
-        <pre><code id="playground-code-block">import asyncio
+    </div>
+  </section>
+
+  <!-- Tool Attention Benchmarker -->
+  <section class="section-wrapper" id="tool-attention">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow">Project I • Function-Calling Efficiency</div>
+        <h2 class="section-title">Eliminating the Model Context Protocol Tax</h2>
+        <p class="section-description">
+          Injecting full JSON schemas for hundreds of enterprise tools wastes up to 51% of context windows. Tool Attention applies semantic cosine similarity to inject tools dynamically.
+        </p>
+      </div>
+
+      <div class="benchmarker-card">
+        <div class="benchmarker-grid">
+          <div class="benchmarker-controls">
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Total Ecosystem Tools (N):</span>
+                <span class="slider-value" id="bm-val-tools">100</span>
+              </div>
+              <input type="range" id="bm-slider-tools" class="range-input" min="10" max="500" value="100" step="10">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Promoted Schemas per Turn (Top-k):</span>
+                <span class="slider-value" id="bm-val-k">3</span>
+              </div>
+              <input type="range" id="bm-slider-k" class="range-input" min="1" max="10" value="3" step="1">
+            </div>
+
+            <p style="font-size:0.86rem; color:var(--text-tertiary); line-height:1.6;">
+              Tool Attention maintains lightweight ~35-token metadata vectors and only promotes full schemas when intent cosine similarity exceeds threshold &tau; &ge; 0.20, protected by a strict Hallucination Gate.
+            </p>
+          </div>
+
+          <div class="comparison-box">
+            <div class="comp-row">
+              <span class="comp-label">Naive Eager MCP Injection:</span>
+              <span class="comp-value-bad" id="bm-naive-tokens">45,000 tokens</span>
+            </div>
+            <div class="comp-row">
+              <span class="comp-label">Tool Attention Dynamic Gating:</span>
+              <span class="comp-value-good" id="bm-dynamic-tokens">4,850 tokens</span>
+            </div>
+            <div class="savings-badge">
+              <div>
+                <div class="savings-badge-text">Tokens Saved per Turn:</div>
+                <div style="font-size:0.75rem; color:var(--text-tertiary);" id="bm-pct-saved">89.2% Context Preserved</div>
+              </div>
+              <div class="savings-badge-val" id="bm-tokens-saved">40,150 tokens</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ultra-Low-Latency Local Voice Oscilloscope -->
+  <section class="section-wrapper" id="voice-pipeline" style="background:#06080e;">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow">Project II • Continuous Real-Time Voice</div>
+        <h2 class="section-title">Sub-500ms Local LiveKit Pipeline</h2>
+        <p class="section-description">
+          100% free, fully local WebRTC voice pipeline running on local CPU/GPU. Zero cloud dependencies, zero latency penalties, and instantaneous barge-in interruption.
+        </p>
+      </div>
+
+      <div class="oscilloscope-card">
+        <div class="oscilloscope-header">
+          <div id="voice-readout-status" style="color:var(--text-secondary);">
+            Standby: Audio stream listener active (16kHz PCM).
+          </div>
+          <div class="oscilloscope-specs">
+            <div class="spec-item">VAD: <span>Silero ONNX (0.22ms)</span></div>
+            <div class="spec-item">TurnDetector: <span>v1-mini (1.3ms)</span></div>
+            <div class="spec-item">Endpointing: <span>Dynamic EMA</span></div>
+          </div>
+        </div>
+
+        <canvas id="oscilloscope-canvas" width="1000" height="150"></canvas>
+
+        <div class="oscilloscope-actions">
+          <button id="btn-voice-stream" class="btn btn-primary btn-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Simulate User Speech Turn
+          </button>
+          <button id="btn-voice-interrupt" class="btn btn-secondary btn-pill" style="color:var(--brand-rose); border-color:rgba(244, 63, 94, 0.3);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+            Trigger Barge-in Interruption
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Academic Whitepapers -->
+  <section class="section-wrapper" id="papers">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow">Project III • Academic Foundations</div>
+        <h2 class="section-title">Peer-Reviewed Research Whitepapers</h2>
+        <p class="section-description">
+          The theoretical architectures, mathematical proofs, and empirical benchmarks proving autonomous recursive self-improvement in operating system control swarms.
+        </p>
+      </div>
+
+      <div class="papers-container">
+        <!-- Paper 1 -->
+        <div class="paper-card">
+          <div>
+            <div class="paper-tag-row">
+              <span class="paper-id">PAPER 01</span>
+              <span class="paper-category">AUTONOMOUS EXPLORATION</span>
+            </div>
+            <h3 class="paper-heading">RSIAgent: Recursive Self-Improvement via Broad-then-Deep Exploration</h3>
+            <p class="paper-snippet">
+              Tripartite multi-agent architecture (Curriculum, Actor, Verifier) formalizing autonomous UI discovery during idle compute cycles without model retraining.
+            </p>
+          </div>
+          <a href="../papers/01_rsi_agent_broad_deep_exploration.md" class="paper-cta" target="_blank" rel="noopener">
+            <span>Read Full Whitepaper</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+
+        <!-- Paper 2 -->
+        <div class="paper-card">
+          <div>
+            <div class="paper-tag-row">
+              <span class="paper-id">PAPER 02</span>
+              <span class="paper-category">TOKEN ATTENTION OPTIMIZATION</span>
+            </div>
+            <h3 class="paper-heading">Eliminating the MCP Tax: Dynamic Tool Attention & Lazy Schemas</h3>
+            <p class="paper-snippet">
+              Mathematical modeling of cosine semantic tool gating and single-pass Code Execution with MCP, reducing prompt token bloat by 91.6% to 95.2%.
+            </p>
+          </div>
+          <a href="../papers/02_eliminating_the_mcp_tax_tool_attention.md" class="paper-cta" target="_blank" rel="noopener">
+            <span>Read Full Whitepaper</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+
+        <!-- Paper 3 -->
+        <div class="paper-card">
+          <div>
+            <div class="paper-tag-row">
+              <span class="paper-id">PAPER 03</span>
+              <span class="paper-category">CAUSAL STRUCTURE & GROUNDING</span>
+            </div>
+            <h3 class="paper-heading">StructAgent & SolveBind: Deterministic Evidence Gating</h3>
+            <p class="paper-snippet">
+              Strict Planner-Actor-Verifier lifecycle requiring shell return codes, file hashes, and accessibility trees to eliminate generative hallucination.
+            </p>
+          </div>
+          <a href="../papers/03_struct_agent_deterministic_causal_evidence.md" class="paper-cta" target="_blank" rel="noopener">
+            <span>Read Full Whitepaper</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+
+        <!-- Paper 4 -->
+        <div class="paper-card">
+          <div>
+            <div class="paper-tag-row">
+              <span class="paper-id">PAPER 04</span>
+              <span class="paper-category">REPLAYABLE MEMORY</span>
+            </div>
+            <h3 class="paper-heading">EchoPath & UI-Evol: Execution-Level Replayable Memory</h3>
+            <p class="paper-snippet">
+              Image-Based Target Reaiming (IBTR) converting visual GUI paths into 12ms deterministic coordinate schemas with autonomous self-healing critique.
+            </p>
+          </div>
+          <a href="../papers/04_echopath_ui_evol_execution_replay.md" class="paper-cta" target="_blank" rel="noopener">
+            <span>Read Full Whitepaper</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+
+        <!-- Paper 5 -->
+        <div class="paper-card">
+          <div>
+            <div class="paper-tag-row">
+              <span class="paper-id">PAPER 05</span>
+              <span class="paper-category">MEMORY & KV CACHE</span>
+            </div>
+            <h3 class="paper-heading">CarryOn: Object-Oriented Context Compaction & FP8 KV Caching</h3>
+            <p class="paper-snippet">
+              Branch folding runtime replacing linear chat histories with active state objects, cutting per-task token consumption by 54.2% and preventing OOMs.
+            </p>
+          </div>
+          <a href="../papers/05_carryon_object_oriented_context_compaction.md" class="paper-cta" target="_blank" rel="noopener">
+            <span>Read Full Whitepaper</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer Studio Playground -->
+  <section class="section-wrapper" id="developers" style="background:#04060a;">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow">API & Developer SDK</div>
+        <h2 class="section-title">One Library. Any Interface.</h2>
+        <p class="section-description">
+          Integrate the AutogenOS Python library, command line binary, or high-performance FastAPI REST and WebSocket endpoints into your autonomous stack.
+        </p>
+      </div>
+
+      <div class="playground-frame">
+        <div class="playground-nav">
+          <button class="playground-tab active" data-tab="python">Python SDK</button>
+          <button class="playground-tab" data-tab="cli">Terminal CLI</button>
+          <button class="playground-tab" data-tab="rest">REST API (FastAPI)</button>
+          <button class="playground-tab" data-tab="websocket">WebRTC WebSocket</button>
+        </div>
+        <pre class="playground-editor"><code id="pg-code">import asyncio
 import autogenos as agy
 
 async def main():
-    # 1. Initialize Swarm Orchestrator
-    controller = agy.SwarmGraphController()
+    # 1. Initialize Swarm Orchestrator with Planner-Actor-Verifier lifecycle
+    orchestrator = agy.SwarmOrchestrator()
 
-    # 2. Execute long-horizon objective with causal verification
+    # 2. Gate tools dynamically via Tool Attention (eliminates MCP token tax)
+    engine = agy.ToolAttentionEngine()
+    active_tools = engine.gate_tools("Process financial invoice and compute file hash", top_k=2)
+
+    # 3. Execute closed-loop long-horizon task with causal verification
+    controller = agy.SwarmGraphController()
     state = await controller.run_full_lifecycle(
-        "Automate financial spreadsheet audit and verify SHA-256"
+        "Audit spreadsheet records and verify checksum with zero side effects"
     )
 
     print(f"Task Phase:      {state.phase.value}")
-    print(f"Evidence Passed: {len(state.accumulated_evidence)}")
-    print(f"Tokens Pruned:   {state.token_usage_pruned} (via CarryOn)")
+    print(f"Verified Proofs: {len(state.accumulated_evidence)}")
+    print(f"Tokens Pruned:   {state.token_usage_pruned} tokens via CarryOn")
 
 if __name__ == "__main__":
     asyncio.run(main())</code></pre>
@@ -286,14 +444,26 @@ if __name__ == "__main__":
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- Studio Footer -->
   <footer>
-    <div style="margin-bottom: 1.5rem;">
-      <a href="#" style="font-weight:700; font-size:1.2rem; color:#fff">AutogenOS</a>
-      <p style="margin-top:0.5rem">Autonomous Multi-Agent Operating System Framework with Recursive Self-Improvement.</p>
-    </div>
-    <div>
-      <p>Licensed under Apache-2.0 • Built with Python, LiveKit, Chrome DevTools Protocol & LangGraph</p>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-info">
+          <a href="#" class="nav-brand">
+            <img src="assets/logo.png" alt="AutogenOS Logo" style="width:24px; height:24px;">
+            <span class="brand-name" style="font-size:1rem;">AutogenOS</span>
+          </a>
+          <p class="footer-copy">
+            Autonomous Multi-Agent Operating System Framework with Recursive Self-Improvement. Licensed under Apache-2.0.
+          </p>
+        </div>
+        <div class="footer-links">
+          <a href="#cockpit" class="footer-link">Cockpit</a>
+          <a href="#tool-attention" class="footer-link">Tool Attention</a>
+          <a href="#papers" class="footer-link">Whitepapers</a>
+          <a href="https://github.com/Meet6338-X/AutogenOS" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
     </div>
   </footer>
 
