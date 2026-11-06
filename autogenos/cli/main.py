@@ -145,6 +145,7 @@ def cmd_serve(args):
 def main():
     print_banner()
     parser = argparse.ArgumentParser(description="AutogenOS Swarm CLI")
+    parser.add_argument("-v", "--version", action="version", version="autogenos 0.1.0")
     subparsers = parser.add_subparsers(dest="command")
 
     # run command
@@ -160,7 +161,7 @@ def main():
     p_voice = subparsers.add_parser("voice", help="Run continuous voice pipeline simulation")
 
     # speak command
-    p_speak = subparsers.add_parser("speak", help="Speak text via 100% free local TTS")
+    p_speak = subparsers.add_parser("speak", help="Speak text via 100%% free local TTS")
     p_speak.add_argument("text", type=str, nargs="?", default=None, help="Text to speak")
 
     # livekit-local command
@@ -182,6 +183,10 @@ def main():
     p_serve.add_argument("--reload", action="store_true", help="Enable live reload")
 
     args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+        return
 
     if args.command == "run":
         asyncio.run(cmd_run(args))
