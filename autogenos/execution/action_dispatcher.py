@@ -1,7 +1,7 @@
 """
 AutogenOS Action Dispatcher: Bridges High-Level Swarm Directives to Native System Runtimes.
-Executes real operations against the OS bridge, terminal, browser, screen vision, and voice subsystems,
-returning deterministic causal evidence for every action.
+Executes real operations against the OS bridge, terminal, browser, screen vision, voice subsystems,
+and open-source component bridges (MCP, Browser-Use, LiveKit), returning deterministic causal evidence for every action.
 """
 
 from __future__ import annotations
@@ -47,6 +47,22 @@ class ActionDispatcher:
         self.tts = tts or LocalTTS()
         self._browser_manager = None
         self._cdp_client = None
+        self._mcp_server = None
+        self._browser_agent = None
+
+    @property
+    def mcp_server(self):
+        if self._mcp_server is None:
+            from autogenos.components.mcp_bridge import AutogenOSMCPServer
+            self._mcp_server = AutogenOSMCPServer()
+        return self._mcp_server
+
+    @property
+    def browser_agent(self):
+        if self._browser_agent is None:
+            from autogenos.components.browser_agent import BrowserAgent
+            self._browser_agent = BrowserAgent()
+        return self._browser_agent
 
     def execute_tool(self, tool_name: str, parameters: Dict[str, Any]) -> Tuple[Dict[str, Any], DeterministicEvidence]:
         """
@@ -123,7 +139,7 @@ class ActionDispatcher:
 
         # 6. Screen Capture & Perceptual Hash
         elif tool_name in ["screen_capture", "screen_capture_hash", "screenshot"]:
-            save_path = parameters.get("save_path", ".autogenos/latest_screen.png")
+            save_path = parameters.get("save_path", ".autogenos/artifacts/screen.png")
             Path(save_path).parent.mkdir(parents=True, exist_ok=True)
             saved = self.screen_vision.save_screenshot(save_path)
             dhash = self.screen_vision.compute_dhash(saved)
@@ -174,6 +190,63 @@ class ActionDispatcher:
             )
             return {"url": url, "success": res["success"]}, evidence
 
+        # 10. Model Context Protocol (MCP) Tool Call
+        elif tool_name in ["mcp_call_tool", "mcp_tool_call"]:
+            name = parameters.get("name", "")
+            args = parameters.get("arguments", {})
+            mcp_res = self.mcp_server.handle_tools_call(name, args)
+            evidence = DeterministicEvidence(
+                evidence_type=EvidenceType.SHELL_OUTPUT,
+                source_target=f"mcp_tool:{name}",
+                raw_payload=json.dumps(mcp_res),
+                passed=not mcp_res.get("isError", False),
+                details=mcp_res
+            )
+            return mcp_res, evidence
+
+        # 11. Browser-Use Markdown Extraction & Scraping
+        elif tool_name in ["browser_extract_markdown", "web_scrape_markdown"]:
+            url = parameters.get("url", "https://github.com/Meet6338-X/AutogenOS")
+            import httpx
+            from autogenos.components.browser_agent import WebContentDistiller
+            try:
+                resp = httpx.get(url, timeout=10.0, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0"})
+                md = WebContentDistiller.html_to_markdown(resp.text)[:5000]
+                interactive = WebContentDistiller.extract_interactive_elements(resp.text)
+                scrape_res = {
+                    "url": url,
+                    "status_code": resp.status_code,
+                    "markdown": md,
+                    "interactive_elements_count": len(interactive)
+                }
+            except Exception as e:
+                scrape_res = {"url": url, "error": str(e), "markdown": ""}
+
+            passed = bool(scrape_res.get("markdown"))
+            evidence = DeterministicEvidence(
+                evidence_type=EvidenceType.DOM_STATE,
+                source_target=f"scraped:{url}",
+                raw_payload=scrape_res.get("markdown", "")[:300],
+                passed=passed,
+                details=scrape_res
+            )
+            return scrape_res, evidence
+
+        # 12. Local LiveKit Token Generation
+        elif tool_name in ["livekit_generate_token", "livekit_token"]:
+            from autogenos.components.livekit_bridge import LiveKitTokenGenerator
+            room = parameters.get("room_name", "autogenos-room")
+            ident = parameters.get("identity", "agent-user")
+            token = LiveKitTokenGenerator.create_token(room_name=room, identity=ident)
+            evidence = DeterministicEvidence(
+                evidence_type=EvidenceType.SHELL_OUTPUT,
+                source_target="livekit_token_generator",
+                raw_payload=f"Generated local LiveKit JWT token for room '{room}'",
+                passed=True,
+                details={"token": token, "room": room, "identity": ident}
+            )
+            return {"token": token, "room": room, "identity": ident}, evidence
+
         # Fallback: General Shell Command
         else:
             logger.warning(f"Unrecognized tool '{tool_name}', executing via shell fallback.")
@@ -217,57 +290,73 @@ class ActionDispatcher:
         if "tool" in metadata:
             return metadata["tool"], metadata.get("parameters", {})
 
-        # 1. Voice / Speech
+        # 1. MCP Tool Invocation
+        if any(w in lower for w in ["call mcp", "invoke mcp", "mcp tool"]):
+            m = re.search(r'mcp\s+tool\s+([a-zA-Z0-9_\-]+)', intent, re.I)
+            name = m.group(1) if m else "autogenos_list_windows"
+            return "mcp_call_tool", {"name": name, "arguments": {}}
+
+        # 2. Web Scrape / Markdown Extraction
+        if any(w in lower for w in ["extract markdown", "scrape website", "scrape page", "read page"]):
+            m = re.search(r'(https?://[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:/[^\s]*)?)', intent)
+            url = m.group(1) if m else "https://github.com/Meet6338-X/AutogenOS"
+            return "browser_extract_markdown", {"url": url}
+
+        # 3. LiveKit Token Generation
+        if any(w in lower for w in ["livekit token", "webrtc token", "room token"]):
+            return "livekit_generate_token", {"room_name": "autogenos-local", "identity": "local-client"}
+
+        # 4. Voice / Speech
         if any(w in lower for w in ["speak", "say", "voice", "audio alert", "announce"]):
             m = re.search(r'["\']([^"\']+)["\']', intent)
             text = m.group(1) if m else re.sub(r'^(speak|say|announce|voice)\s*', '', intent, flags=re.IGNORECASE)
             return "voice_speak", {"text": text.strip() or "AutogenOS task completed."}
 
-        # 2. Window Focus
+        # 5. Window Focus
         if any(w in lower for w in ["focus", "switch to", "bring to front", "maximize window"]):
             m = re.search(r'(?:focus|switch to|bring to front|maximize window)\s+(?:window\s+)?["\']?([^"\'\n]+)["\']?', intent, re.I)
             title = m.group(1).strip() if m else "Brave"
             return "os_focus_window", {"title": title}
 
-        # 3. List Windows / Status
+        # 6. List Windows / Status
         if any(w in lower for w in ["list windows", "inspect windows", "active windows", "open windows", "inspect open windows"]):
             return "os_list_windows", {}
 
-        # 4. Browser Navigation / Web Search
+        # 7. Browser Navigation / Web Search
         if any(w in lower for w in ["browse", "navigate", "open url", "go to", "search google", "visit"]):
             m = re.search(r'(https?://[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:/[^\s]*)?)', intent)
             url = m.group(1) if m else "https://github.com/Meet6338-X/AutogenOS"
             return "browser_navigate", {"url": url}
 
-        # 5. Screen Capture / Screenshot
+        # 8. Screen Capture / Screenshot
         if any(w in lower for w in ["screenshot", "screen capture", "capture screen", "capture region", "screen hash"]):
             return "screen_capture", {"save_path": ".autogenos/artifacts/screen.png"}
 
-        # 6. Typing / Text Injection
+        # 9. Typing / Text Injection
         if any(w in lower for w in ["type", "write", "send keys", "keystroke"]):
             m = re.search(r'["\']([^"\']+)["\']', intent)
             text = m.group(1) if m else "Hello from AutogenOS Swarm!"
             return "os_type_text", {"text": text}
 
-        # 7. Mouse Click
+        # 10. Mouse Click
         if any(w in lower for w in ["click", "mouse click"]):
             m = re.search(r'(\d+)\s*,\s*(\d+)', intent)
             x = int(m.group(1)) if m else 500
             y = int(m.group(2)) if m else 500
             return "os_click_coordinate", {"x": x, "y": y}
 
-        # 8. File Hash Verification
+        # 11. File Hash Verification
         if any(w in lower for w in ["verify hash", "check sha256", "assert hash"]):
             m = re.search(r'["\']?([a-zA-Z0-9_\-\./\\]+\.[a-zA-Z0-9]+)["\']?', intent)
             path = m.group(1) if m else "README.md"
             return "verifier_assert_hash", {"file_path": path}
 
-        # 9. Filesystem structure verification
+        # 12. Filesystem structure verification
         if any(w in lower for w in ["file system", "filesystem", "directory structure", "folder structure"]):
             cmd = "dir" if os.name == "nt" else "ls -la"
             return "os_exec_shell", {"command": cmd}
 
-        # 10. App Launching / Process execution
+        # 13. App Launching / Process execution
         if any(w in lower for w in ["launch", "open", "start"]) and not any(x in lower for x in ["window", "browser", "url", "site"]):
             m = re.search(r'(?:launch|open|start)\s+(?:application\s+|app\s+)?["\']?([^"\'\n]+)["\']?', intent, re.I)
             app = m.group(1).strip() if m else "notepad"

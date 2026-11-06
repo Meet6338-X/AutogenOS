@@ -109,6 +109,24 @@ class ToolAttentionEngine:
                 tags=["git", "worktree", "branch", "swarm", "isolate"],
                 schema={"type": "object", "properties": {"agent_id": {"type": "string"}}},
             ),
+            ToolMetadata(
+                name="mcp_call_tool",
+                summary="Dispatch tool invocation via Model Context Protocol (MCP) JSON-RPC 2.0 interface",
+                tags=["mcp", "protocol", "jsonrpc", "tool", "dispatch", "remote", "plugin"],
+                schema={"type": "object", "properties": {"name": {"type": "string"}, "arguments": {"type": "object"}}, "required": ["name"]},
+            ),
+            ToolMetadata(
+                name="browser_extract_markdown",
+                summary="Scrape web page and distill DOM into token-efficient Markdown with interactive element annotations",
+                tags=["browser", "web", "scrape", "markdown", "distill", "dom", "extract", "html", "interactive"],
+                schema={"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]},
+            ),
+            ToolMetadata(
+                name="livekit_generate_token",
+                summary="Generate HMAC-SHA256 JWT credentials for 100% free local LiveKit WebRTC audio/video rooms",
+                tags=["livekit", "webrtc", "token", "jwt", "voice", "stream", "room", "credentials"],
+                schema={"type": "object", "properties": {"room_name": {"type": "string"}, "identity": {"type": "string"}}},
+            ),
         ]
         for t in defaults:
             self.registry.register(t)
