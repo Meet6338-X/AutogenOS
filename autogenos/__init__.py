@@ -45,7 +45,7 @@ from autogenos.components.terminal_runner import TerminalRunner
 from autogenos.components.browser_automation import LocalBrowserManager
 
 __version__ = "0.1.0"
-__author__ = "AutogenOS Team"
+__author__ = "Meet Shah"
 
 __all__ = [
     "SwarmOrchestrator",

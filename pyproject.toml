@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "autogenos"
 version = "0.1.0"
 description = "Autonomous Multi-Agent Operating System Framework with Recursive Self-Improvement"
-authors = [{ name = "AutogenOS Team" }]
+authors = [{ name = "Meet Shah", email = "meet@autogenos.org" }]
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
@@ -20,7 +20,16 @@ dependencies = [
     "httpx>=0.27.0",
     "GitPython>=3.1.40",
     "pyyaml>=6.0.1",
+    "pillow>=10.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
 ]
+
+[project.urls]
+Homepage = "https://meet6338-x.github.io/AutogenOS/"
+Documentation = "https://meet6338-x.github.io/AutogenOS/"
+Repository = "https://github.com/Meet6338-X/AutogenOS"
+Issues = "https://github.com/Meet6338-X/AutogenOS/issues"
 
 [project.optional-dependencies]
 windows = [
@@ -48,4 +57,3 @@ autogenos = "autogenos.cli.main:main"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 asyncio_mode = "auto"
-
