@@ -19,7 +19,7 @@
   <a href="https://github.com/Meet6338-X/AutogenOS/actions/workflows/deploy-pages.yml"><img src="https://github.com/Meet6338-X/AutogenOS/actions/workflows/deploy-pages.yml/badge.svg" alt="Deploy GitHub Pages"/></a>
   <a href="https://github.com/Meet6338-X/AutogenOS/actions/workflows/ci.yml"><img src="https://github.com/Meet6338-X/AutogenOS/actions/workflows/ci.yml/badge.svg" alt="CI & Tests"/></a>
   <a href="https://github.com/Meet6338-X/AutogenOS/actions"><img src="https://img.shields.io/badge/tests-35%20passed%20%7C%20100%25-brightgreen.svg?style=flat&logo=pytest&logoColor=white" alt="Tests"/></a>
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?style=flat&logo=python&logoColor=white" alt="Python 3.10+"/></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB.svg?style=flat&logo=python&logoColor=white" alt="Python 3.11+"/></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg?style=flat" alt="Platforms"/>
   <img src="https://img.shields.io/badge/voice-LiveKit%20%3C500ms-FF4F00.svg?style=flat&logo=webrtc&logoColor=white" alt="Voice Latency"/>
   <img src="https://img.shields.io/badge/token%20overhead--95%25-success.svg?style=flat" alt="Token Reduction"/>
