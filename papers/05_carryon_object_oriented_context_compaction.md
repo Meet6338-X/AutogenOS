@@ -34,24 +34,19 @@ This rapidly exceeds modern multi-GPU server capacity, causing sudden OOM crashe
 
 CarryOn replaces linear, append-only message histories with an **Object-Oriented State DAG**:
 
-```
-[Traditional Monolithic History]
-Turn 1 -> Turn 2 -> ... -> Turn 150 (Total: 85,000 tokens in KV Cache)
+```mermaid
+flowchart TB
+    subgraph TraditionalLinear ["Traditional Monolithic Conversation History (Linear Degradation)"]
+        T1["Turn 1"] --> T2["Turn 2"] --> T3["..."] --> T150["Turn 150<br/>Total: 85,000 Tokens (KV Cache Saturation)"]
+    end
 
-[CarryOn Object-Oriented Folding]
-Turn 1 ... Turn 12 [Branch 1: Setup Environment]
-                  |
-                  v  (CarryOn Compactor)
-       +------------------------------------+
-       | FoldedTaskObject:                  |
-       | - task_id: "env_setup_01"          |
-       | - status: "COMMITTED"              |
-       | - output_state: {"python": "3.12"} |
-       | - tokens: 45 (was 4,200 tokens)    |
-       +------------------------------------+
-                  |
-                  +---> Injected into Active Working State Object
+    subgraph CarryOnCompaction ["CarryOn Object-Oriented Compaction & Branch Folding"]
+        Branch["Subtask Turns 1..12<br/>(Setup Environment)"] -->|Verifier PASS| Compactor["CarryOn Compactor Operator F"]
+        Compactor --> Folded["FoldedTaskObject<br/>&bull; ID: env_setup_01<br/>&bull; Status: COMMITTED<br/>&bull; Output State: Python 3.12, SHA-256 Verified<br/><b>Tokens: 45</b> (Reduced from 4,200)"]
+        Folded --> Active["Injected into Active Working State Object<br/>Clean Minimal Working KV Memory"]
+    end
 ```
+*Fig. 1. CarryOn Object-Oriented Context Compaction vs. traditional monolithic message history.*
 
 ### 2.1 Branch Folding Invariant
 

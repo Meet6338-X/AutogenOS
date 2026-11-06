@@ -24,44 +24,19 @@ StructAgent eliminates this failure mode by replacing conversational self-report
 
 ## 2. Causal Structuring & Formal State Machine
 
+```mermaid
+flowchart TD
+    User["User Intent Dispatched"] --> Planner["Planner Node<br/>(Causal Subtask DAG Synthesis)"]
+    Planner --> Actor["Actor Node<br/>(Isolated Worktree Execution)"]
+    Actor -->|Proposed State Diff Delta S| Verifier["Verifier Node<br/>(Deterministic Evidence Evaluator)"]
+    
+    Verifier -->|Deterministic Evidence Valid| Commit["Commit State Transition<br/>(Async Durable SQLite/Postgres Checkpointer)"]
+    Verifier -->|Evidence Invalid / Error| Fail["Dynamic Failure Attribution<br/>& Local Reflexion Repair"]
+    
+    Fail -->|Re-route & Repair| Planner
+    Commit --> Next["Advance to Next Subtask in Causal DAG"]
 ```
-              +------------------------------------------+
-              |           User Intent Dispatched         |
-              +------------------------------------------+
-                                   |
-                                   v
-                      +--------------------------+
-                      |       Planner Node       |
-                      |  (Causal Subtask DAG)    |
-                      +--------------------------+
-                                   |
-                                   v
-                      +--------------------------+
-                      |        Actor Node        |
-                      | (Isolated Worktree Exec) |
-                      +--------------------------+
-                                   |
-                         [Proposed State Diff]
-                                   v
-                      +--------------------------+
-                      |      Verifier Node       |
-                      |   (Evidence Evaluator)   |
-                      +--------------------------+
-                                   |
-                   +---------------+---------------+
-                   |                               |
-       [Deterministic Evidence]          [Evidence Invalid]
-                   |                               |
-                   v                               v
-    +------------------------------+   +-----------------------+
-    | Commit State Transition      |   | Dynamic Failure       |
-    | (Async Durable Checkpointer) |   | Attribution & Repair  |
-    +------------------------------+   +-----------------------+
-                   |                               |
-                   |                               +---> [Re-Route to Planner]
-                   v
-       (Advance to Next Subtask)
-```
+*Fig. 1. StructAgent Causal Execution Graph: Verifier-backed state transitions and durable checkpointer gating.*
 
 ### 2.1 Deterministic Evidence Predicates
 

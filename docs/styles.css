@@ -863,6 +863,66 @@ body {
   color: var(--text-primary);
 }
 
+.btn-paper-diagram {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 0.48rem 0.95rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.btn-paper-diagram:hover {
+  background: #059669;
+  color: #ffffff;
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+.paper-diagram-drawer {
+  display: none;
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: #090e17;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 8px;
+  overflow-x: auto;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.paper-diagram-drawer.open {
+  display: block;
+  animation: fadeInDiagram 0.25s ease-out;
+}
+
+@keyframes fadeInDiagram {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.paper-diagram-drawer .mermaid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.paper-diagram-drawer .mermaid svg {
+  max-width: 100% !important;
+  max-height: 480px;
+  height: auto !important;
+  margin: 0 auto;
+}
+
 .paper-meta-badge {
   display: inline-flex;
   align-items: center;

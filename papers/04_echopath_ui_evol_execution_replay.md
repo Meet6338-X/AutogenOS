@@ -25,42 +25,20 @@ This paradigm is economically and latency-wise non-viable for scalable digital w
 
 ## 2. EchoPath: Image-Based Target Reaiming (IBTR)
 
+```mermaid
+flowchart TD
+    Traj["Validated Successful GUI Trajectory"] --> Compiler["EchoPath Schema Compiler<br/>(Extract Target Crops & Accessibility Signatures)"]
+    Compiler --> DB[("Replayable Memory Graph DB<br/>(Perceptual Hash Index)")]
+    DB --> Trigger["Replay Triggered (User / Swarm Task)"]
+    Trigger --> IBTR["IBTR Reaiming Engine"]
+    Screen["Capture Active Desktop Display<br/>(Direct GDI/DXGI Framebuffer)"] --> IBTR
+    
+    IBTR --> Eval{"2D Normalized Cross-Correlation<br/>Match Threshold gamma &ge; 0.92"}
+    Eval -->|Match Valid| Exec["Instant Direct Execution<br/>Zero VLM Latency (&lt; 10ms)"]
+    Eval -->|UI Shift Detected| Evol["UI-Evol Retrace & Critique<br/>(Bounded VLM Dynamic Repair)"]
+    Evol --> DB
 ```
-[Validated Successful GUI Trajectory]
-                  |
-                  v
-    +---------------------------+
-    | EchoPath Schema Compiler  |
-    +---------------------------+
-                  |
-         (Extract Target Crops
-          & AX Path Signatures)
-                  |
-                  v
-      +-----------------------+
-      | Replayable Graph DB   |
-      +-----------------------+
-                  |
-           [Replay Triggered]
-                  |
-                  v
-      +-----------------------+
-      |  IBTR Reaiming Engine | <--- (Capture Fresh Screen)
-      +-----------------------+
-                  |
-       (Normalized Cross-Correlation
-        & Relative Coordinate Scale)
-                  |
-         +--------+--------+
-         |                 |
-     [Match > 0.92]    [Mismatch / UI Shift]
-         |                 |
-         v                 v
-   +------------+   +----------------------------+
-   | Instant    |   | UI-Evol Retrace & Critique |
-   | Click/Type |   | (Bounded VLM Repair)       |
-   +------------+   +----------------------------+
-```
+*Fig. 1. EchoPath Image-Based Target Reaiming (IBTR) and UI-Evol Replayable Memory Architecture.*
 
 ### 2.1 The IBTR Algorithm
 

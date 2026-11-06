@@ -56,6 +56,7 @@ graph TD
     EchoPath -->|Deterministic Replay| Orchestrator
     CarryOn -->|Pruned State Cache| Bifrost
 ```
+*Fig. 1. Unified AutogenOS Master System Architecture: Full Multimodal and Agent Swarm Stack.*
 
 ---
 
@@ -88,6 +89,7 @@ sequenceDiagram
         P->>P: Dynamic Re-planning & Bounded Repair
     end
 ```
+*Fig. 2. Real-Time Multimodal Voice-to-Action Protocol: Planner-Actor-Verifier Causal Execution Loop.*
 
 ### Formal Master Directive Specification
 
@@ -154,6 +156,7 @@ flowchart LR
     Gate -- No --> Suppress["Suppress / Lazy Retain in Background"]
     Promote --> LLMReasoning["LLM Context (Token Utilization: 24% -> 91%)"]
 ```
+*Fig. 3. Dynamic Tool Attention: Cosine Semantic Gating and Schema Promotion Pipeline.*
 
 ### 3.2 Progressive Disclosure (`SKILLS.md`) & PydanticAI Type Safety
 
@@ -181,6 +184,7 @@ flowchart TB
         C3 -->|Only Return Clean Final State Diff| C4[Verifier Validation & Commit]
     end
 ```
+*Fig. 4. Single-Pass Code Execution with MCP vs. Traditional Multi-Turn JSON-RPC Loop.*
 
 ### 3.4 Gateway Infrastructure: Bifrost vs. LiteLLM
 
@@ -220,6 +224,7 @@ graph TD
         MacEngine --> CGEvent[CoreGraphics CGEvent Injection]
     end
 ```
+*Fig. 5. Cross-Platform Native OS Bridge: Unified Window and Event Dispatch Architecture.*
 
 ### 4.2 Swarm Concurrency: Isolated Git Worktrees + AsyncPostgresSaver
 
@@ -241,6 +246,7 @@ flowchart LR
     Actor1 & Actor2 & Actor3 --> VerifierNode[Verifier Agent Integration Check]
     VerifierNode -->|Causal Merge Validation| MainBranch["Committed to Main Branch"]
 ```
+*Fig. 6. Isolated Git Worktree Swarm Concurrency: Independent Subagent Sandboxes.*
 
 ### 4.3 Pure CDP Browser Automation (`cdp-use`)
 
@@ -279,6 +285,7 @@ sequenceDiagram
         Spk->>Spk: Discard Queued Frames & Reset Pipeline
     end
 ```
+*Fig. 7. Low-Latency Multimodal Audio & Voice Protocol with TurnDetector v1-mini.*
 
 #### Dynamic Turn Detection Performance
 
@@ -311,6 +318,7 @@ graph TD
     Carry -->|Bounded Inference| Struct
     Bench -->|Evaluated Milestones| RSI
 ```
+*Fig. 8. Five Foundational Academic Pillars for Recursive Self-Improving Agent Swarms.*
 
 ### 5.1 RSIAgent: Broad-then-Deep Recursive Self-Improvement
 1. **Stage-1: Broad Recursive Self-Exploration**: Curriculum agents explore cross-application GUI surfaces without human supervision, generating Code-as-Policy scripts to discover UI affordances.

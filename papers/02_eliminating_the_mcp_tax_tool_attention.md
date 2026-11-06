@@ -66,26 +66,22 @@ LLM -> {"tool": "read_table"} -> MCP Server -> {"rows": 50,000 tokens} -> LLM ->
 
 In AutogenOS, Tool Attention is coupled with **Code Execution with MCP**:
 
-```
-+-----------------------------------------------------------------------+
-|                Traditional MCP: Sequential Multi-Turn                 |
-+-----------------------------------------------------------------------+
-[Model] --(Call Tool 1)--> [MCP] --(50k Intermediate Tokens)--> [Model]
-   |
-   +-(Bloat!)--(Call Tool 2)--> [MCP] --(Filtered Result)--> [Model]
-Total Tokens: ~120,000 | Turns: 4 | Latency: High
+```mermaid
+flowchart TB
+    subgraph TraditionalMCP ["Traditional MCP: Sequential Multi-Turn Overhead"]
+        M1["LLM Context"] -->|1. Call Tool A| S1["MCP Server"]
+        S1 -->|50,000 Intermediate Tokens Bloat| M1
+        M1 -->|2. Call Tool B| S2["MCP Server"]
+        S2 -->|Filtered Result| M1
+    end
 
-+-----------------------------------------------------------------------+
-|            AutogenOS: Single-Pass Code Execution with MCP             |
-+-----------------------------------------------------------------------+
-[Model] --(Single Program Synthesis: Python/Bash Script)--> [Isolated Sandbox]
-                                                                  |
-                                               (Executes locally; intermediate
-                                                50k data stays in RAM/Disk)
-                                                                  v
-[Model] <--(Returns Clean Final State Diff & SHA-256 Evidence)----+
-Total Tokens: ~2,500 | Turns: 1 | Latency: Ultra-Low (<150ms)
+    subgraph AutogenOSMCP ["AutogenOS: Single-Pass Code Execution with MCP"]
+        M2["LLM Context"] -->|Single Program Synthesis: Python / Bash| Sandbox["Isolated Sandbox Runtime<br/>(Local RAM / Disk Temp Space)"]
+        Sandbox -->|Executes locally; intermediate 50k tokens stay in RAM| Digest["SHA-256 State Diff & Digest"]
+        Digest -->|Clean Grounded Return: &lt; 2,500 Tokens| M2
+    end
 ```
+*Fig. 1. Architectural comparison: Naive multi-turn MCP conversation serialization vs. AutogenOS single-pass code execution sandbox.*
 
 ---
 
