@@ -24,11 +24,18 @@ class DurableStateSaver:
     def __init__(self, db_path: Optional[str | Path] = None):
         self.db_path = str(db_path) if db_path else ":memory:"
         # Keep persistent connection for in-memory or thread-pool mode
-        self._conn = sqlite3.connect(
-            self.db_path,
-            check_same_thread=False,
-            autocommit=True
-        )
+        try:
+            self._conn = sqlite3.connect(
+                self.db_path,
+                check_same_thread=False,
+                autocommit=True
+            )
+        except (TypeError, ValueError):
+            self._conn = sqlite3.connect(
+                self.db_path,
+                check_same_thread=False,
+                isolation_level=None
+            )
         self._conn.row_factory = sqlite3.Row
         self._init_db()
 
