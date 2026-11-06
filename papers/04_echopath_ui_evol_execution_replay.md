@@ -1,5 +1,11 @@
 # EchoPath and UI-Evol: Execution-Level Replayable Memory via Image-Based Target Reaiming and Autonomous Knowledge Adaptation
 
+**Author:** Meet Shah  
+*Autonomous Systems & Swarm Intelligence Lab, AutogenOS Foundation*  
+meet@autogenos.org | [https://github.com/Meet6338-X/AutogenOS](https://github.com/Meet6338-X/AutogenOS)  
+*Published: November 2026*
+
+
 **Abstract**  
 Repetitive graphical user interface (GUI) automation executed through open-ended visual language models (VLMs) incurs unacceptable token costs and latency bottlenecks. Grounding an identical sequence of buttons, menus, and text fields on every run forces multi-modal models to repeatedly re-parse megabytes of screen pixels. In this paper, we present **EchoPath** and **UI-Evol**, a dual framework for converting validated GUI interaction traces into deterministic, callable execution-level schemas. EchoPath introduces the **Image-based Target-Reaiming (IBTR)** algorithm: when a workflow succeeds, target element image crops and structural accessibility paths are stored in a persistent replay graph. Subsequent executions reaim stored crops directly onto current display coordinates via sub-pixel normalized cross-correlation and perceptual hashing, bypassing VLM visual grounding entirely. When software updates mutate visual aesthetics or DOM structures, **UI-Evol** executes a two-stage self-healing protocol: the *Retrace Stage* isolates the exact divergence between expected and observed telemetry, and the *Critique Stage* synthesizes evolved locators without human intervention. On production GUI workflows, EchoPath reduces execution latency by **86.4%** while slashing inference token expenditure by **94.7%**.
 

@@ -1,5 +1,11 @@
 # CarryOn: Object-Oriented Context Compaction and KV-Cache Memory Optimization for Long-Horizon OS Agents
 
+**Author:** Meet Shah  
+*Autonomous Systems & Swarm Intelligence Lab, AutogenOS Foundation*  
+meet@autogenos.org | [https://github.com/Meet6338-X/AutogenOS](https://github.com/Meet6338-X/AutogenOS)  
+*Published: November 2026*
+
+
 **Abstract**  
 Long-horizon operating system control frequently demands trajectories exceeding 250 operational turns. In append-only conversational architectures, intermediate reasoning traces, verbose shell outputs, and repeated DOM trees rapidly consume millions of tokens, leading to Key-Value (KV) cache memory exhaustion and catastrophic out-of-memory (OOM) failures in multi-agent swarms. In this paper, we introduce **CarryOn**, an object-oriented context runtime that organizes multi-agent execution around immutable, typed state objects rather than expanding linear histories. As subtasks conclude, CarryOn dynamically folds completed operational branches into compact active state objects, retiring multi-turn conversational clutter. Coupled with FP8 KV-cache pre-allocation and bounded tensor limits within high-throughput inference backends (such as vLLM), CarryOn cuts total token consumption by **54.2%**, lowers per-task inference expenditure by **35.9%**, and eliminates swarm KV-cache memory exhaustion across extended multi-hour desktop automation sessions.
 
