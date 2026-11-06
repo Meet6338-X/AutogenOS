@@ -18,7 +18,7 @@
 <p align="center">
   <a href="https://github.com/Meet6338-X/AutogenOS/actions/workflows/deploy-pages.yml"><img src="https://github.com/Meet6338-X/AutogenOS/actions/workflows/deploy-pages.yml/badge.svg" alt="Deploy GitHub Pages"/></a>
   <a href="https://github.com/Meet6338-X/AutogenOS/actions/workflows/ci.yml"><img src="https://github.com/Meet6338-X/AutogenOS/actions/workflows/ci.yml/badge.svg" alt="CI & Tests"/></a>
-  <a href="https://github.com/Meet6338-X/AutogenOS/actions"><img src="https://img.shields.io/badge/tests-35%20passed%20%7C%20100%25-brightgreen.svg?style=flat&logo=pytest&logoColor=white" alt="Tests"/></a>
+  <a href="https://github.com/Meet6338-X/AutogenOS/actions"><img src="https://img.shields.io/badge/tests-40%20passed%20%7C%20100%25-brightgreen.svg?style=flat&logo=pytest&logoColor=white" alt="Tests"/></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB.svg?style=flat&logo=python&logoColor=white" alt="Python 3.11+"/></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg?style=flat" alt="Platforms"/>
   <img src="https://img.shields.io/badge/voice-LiveKit%20%3C500ms-FF4F00.svg?style=flat&logo=webrtc&logoColor=white" alt="Voice Latency"/>
@@ -322,7 +322,7 @@ AutogenOS/
 │   └── eval/                  # Agent-Diff verification & OSWorld 2.0 runner
 ├── docs/                      # Interactive GitHub Pages web portal & IEEE PDFs
 ├── papers/                    # Markdown source for all 6 IEEE Transactions papers
-├── tests/                     # 35 comprehensive test suites (100% pass rate)
+├── tests/                     # 40 comprehensive test suites (100% pass rate)
 ├── pyproject.toml             # PEP 517/518 build metadata & dependencies
 ├── LICENSE                    # Apache-2.0 License
 └── README.md

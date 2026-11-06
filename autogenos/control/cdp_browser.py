@@ -11,13 +11,15 @@ import asyncio
 import logging
 from typing import Any, Dict, Optional, List
 import websockets
+import httpx
 
 logger = logging.getLogger("autogenos.cdp_browser")
 
 
 class CDPBrowserClient:
     """
-    Direct WebSocket client connecting to Chrome remote debugging port (default 9222).
+    Direct WebSocket client connecting to Chrome remote debugging targets.
+    Supports auto-discovering active page targets and full page manipulation.
     """
 
     def __init__(self, ws_url: str = "ws://127.0.0.1:9222/devtools/browser"):
@@ -27,8 +29,43 @@ class CDPBrowserClient:
         self._pending_requests: Dict[int, asyncio.Future] = {}
         self._is_listening = False
 
+    @classmethod
+    async def connect_to_active_page(
+        cls,
+        host: str = "127.0.0.1",
+        port: int = 9222,
+        timeout: float = 5.0
+    ) -> Optional["CDPBrowserClient"]:
+        """
+        Discovers the active page target via Chrome's HTTP endpoint /json
+        and connects directly to the page WebSocket debugger.
+        """
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                res = await client.get(f"http://{host}:{port}/json")
+                targets = res.json()
+                page_target = next((t for t in targets if t.get("type") == "page"), None)
+                if not page_target:
+                    # Create new page
+                    new_res = await client.put(f"http://{host}:{port}/json/new")
+                    page_target = new_res.json()
+
+                ws_url = page_target.get("webSocketDebuggerUrl")
+                if ws_url:
+                    cdp = cls(ws_url=ws_url)
+                    if await cdp.connect(timeout=timeout):
+                        try:
+                            await cdp.send_command("Page.enable")
+                            await cdp.send_command("Runtime.enable")
+                        except Exception:
+                            pass
+                        return cdp
+        except Exception as e:
+            logger.warning(f"Failed to discover active page CDP target: {e}")
+        return None
+
     async def connect(self, timeout: float = 5.0) -> bool:
-        """Establishes WebSocket connection to the browser target."""
+        """Establishes WebSocket connection to the target."""
         try:
             self._connection = await asyncio.wait_for(
                 websockets.connect(self.ws_url), timeout=timeout
