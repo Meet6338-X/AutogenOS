@@ -1,5 +1,11 @@
 # RSIAgent: Recursive Self-Improvement in Operating System Control via Broad-then-Deep Autonomous Exploration
 
+**Author:** Meet Shah  
+*Autonomous Systems & Swarm Intelligence Lab, AutogenOS Foundation*  
+meet@autogenos.org | [https://github.com/Meet6338-X/AutogenOS](https://github.com/Meet6338-X/AutogenOS)  
+*Published: November 2026*
+
+
 **Abstract**  
 Autonomous control of personal computer operating systems demands long-horizon reasoning, rapid grounding across heterogeneous graphical user interfaces (GUIs), and robust recovery from unexpected runtime divergence. Monolithic foundation models deployed in zero-shot execution regimes suffer from verification barriers, cascading step errors, and rapid context saturation. In this paper, we formalize **RSIAgent**, a tripartite autonomous multi-agent architecture composed of a *Curriculum Agent*, an *Actor Agent*, and an *independent Verifier Agent*. Operating during idle system compute cycles, RSIAgent executes a two-stage exploration policy: **Stage-1 (Broad Recursive Self-Exploration)** discovers application affordances and synthesizes Code-as-Policy scripts across distinct software domains; **Stage-2 (Deep Recursive Self-Exploration)** autonomously sequences adversarial boundary conditions, modal disruptions, and crash recovery scenarios to stress-test knowledge. Validated operational trajectories are causally grounded via raw OS accessibility trees and deterministically compiled into frozen, replayable memory graphs without parameter retraining. On complex multi-app benchmarks, RSIAgent demonstrates that open-source backbones equipped with recursive causal experience outperform closed-source frontier models.
 

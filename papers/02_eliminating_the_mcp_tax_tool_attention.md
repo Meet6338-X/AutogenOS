@@ -1,5 +1,11 @@
 # Eliminating the MCP Tax: Dynamic Tool Attention and Lazy Schema Resolution for Massively Parallel Agent Swarms
 
+**Author:** Meet Shah  
+*Autonomous Systems & Swarm Intelligence Lab, AutogenOS Foundation*  
+meet@autogenos.org | [https://github.com/Meet6338-X/AutogenOS](https://github.com/Meet6338-X/AutogenOS)  
+*Published: November 2026*
+
+
 **Abstract**  
 The Model Context Protocol (MCP) has unified tool connectivity across autonomous agent platforms. However, its widespread adoption has introduced a catastrophic operational bottleneck known in system literature as the **"MCP Tax"**. In dense enterprise environments containing hundreds of external tools, eager schema injection forces between 10,000 and 60,000 tokens of static JSON metadata into the prompt prior to the generation of a single reasoning token—consuming up to 51% of the baseline context window and driving Key-Value (KV) cache saturation. In this paper, we propose **Tool Attention**, an ultra-low-latency semantic tool gating and lazy schema loading mechanism. Tool Attention computes cosine semantic similarity between streaming task intent and a compact summary pool (~35 tokens per tool), promoting full JSON schemas for only the top-$k$ relevant tools while strictly gating unsupported calls through a formal Hallucination Gate. Integrated with single-pass **Code Execution with MCP** and the compiled Go-based **Bifrost** gateway (~11µs overhead), Tool Attention reduces per-turn tool tokens by **91.4% to 95.2%**, elevating effective context reasoning capacity from 24% to 91%.
 

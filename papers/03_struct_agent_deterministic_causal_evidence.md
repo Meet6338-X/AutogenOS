@@ -1,5 +1,11 @@
 # StructAgent and SolveBind: Deterministic Environmental Evidence Gating in Autonomous Digital Workforces
 
+**Author:** Meet Shah  
+*Autonomous Systems & Swarm Intelligence Lab, AutogenOS Foundation*  
+meet@autogenos.org | [https://github.com/Meet6338-X/AutogenOS](https://github.com/Meet6338-X/AutogenOS)  
+*Published: November 2026*
+
+
 **Abstract**  
 Unconstrained agentic loops generate plausible, well-formatted natural language that masks underlying task execution failures. In real-world desktop and operating system automation, generative fluency is orthogonal to verifiable state modification. In this paper, we formulate **StructAgent** and **SolveBind**, a unified causal structuring framework for multi-agent swarms. StructAgent enforces an invariant state machine lifecycle: **Planner $\rightarrow$ Actor $\rightarrow$ Verifier**. Progress across atomic subtasks is strictly gated: state transitions are committed to durable thread-scoped persistence (backed by PostgreSQL or SQLite WAL checkpointers) **if and only if** a specialized Verifier subagent attaches deterministic environmental evidence. Environmental evidence consists of raw shell exit codes, exact SHA-256 file digests, DOM accessibility tree mutations, and closed-world database state diffs. When evidence fails, StructAgent dynamically attributes failure causes and re-routes execution back to the Planner node for bounded repair, structurally eliminating hallucinated task completion.
 
