@@ -72,31 +72,63 @@ graph TD
 
 ```
 AutogenOS/
+├── papers/
+│   ├── 01_rsi_agent_broad_deep_exploration.md          # RSIAgent theoretical whitepaper
+│   ├── 02_eliminating_the_mcp_tax_tool_attention.md    # Tool Attention & MCP Tax whitepaper
+│   ├── 03_struct_agent_deterministic_causal_evidence.md# StructAgent & SolveBind whitepaper
+│   ├── 04_echopath_ui_evol_execution_replay.md         # EchoPath IBTR & UI-Evol whitepaper
+│   └── 05_carryon_object_oriented_context_compaction.md# CarryOn context compaction whitepaper
 ├── autogenos/
+│   ├── api/
+│   │   └── server.py              # High-performance FastAPI REST & WebSocket server
+│   ├── components/
+│   │   ├── local_whisper.py       # 100% free offline STT via faster-whisper
+│   │   ├── local_tts.py           # 100% free zero-latency TTS (Windows SAPI5/offline)
+│   │   ├── livekit_local.py       # Free local LiveKit room & WebRTC server
+│   │   ├── screen_vision.py       # PIL ImageGrab & perceptual dHash grounding
+│   │   ├── vector_search.py       # TF-IDF & dense semantic vector retrieval
+│   │   ├── terminal_runner.py     # Real-time streaming CLI with RTK compression
+│   │   └── browser_automation.py  # Chrome/Edge launcher with remote debugging
 │   ├── core/
 │   │   ├── orchestrator.py        # Central Router & Graph Orchestration
 │   │   ├── prompt_protocol.py     # Master Operational Contract & Directives
 │   │   └── state.py               # Typed State & Causal Evidence
 │   ├── tool_attention/
 │   │   ├── engine.py              # Semantic Tool Gating & Cosine Matcher
-│   │   └── registry.py            # Lazy Schema & Tool Metadata Store
+│   │   ├── registry.py            # Lazy Schema & Tool Metadata Store
+│   │   └── token_killer.py        # RTK Terminal Output Compressor
 │   ├── skills/
 │   │   └── progressive_loader.py  # SKILLS.md Parser & Allowed-Tools Scoper
 │   ├── execution/
-│   │   ├── worktree_manager.py    # Isolated Git Worktree Concurrency
-│   │   └── code_runner.py         # Sandboxed Code Execution Controller
+│   │   ├── code_runner.py         # Single-pass Code-as-Policy MCP runner
+│   │   ├── sandbox.py             # Ephemeral process sandbox
+│   │   └── worktree_manager.py    # Isolated Git Worktree Concurrency
 │   ├── control/
+│   │   ├── base.py                # Abstract OS controller interface
 │   │   ├── windows_bridge.py      # Win32 / UI Automation Native Bridge
+│   │   ├── linux_bridge.py        # Linux X11 / AT-SPI D-Bus Bridge
+│   │   ├── mac_bridge.py          # macOS Accessibility Bridge
+│   │   ├── os_controller.py       # Cross-platform auto-detecting facade
 │   │   └── cdp_browser.py         # Pure WebSocket CDP Browser Controller
 │   ├── voice/
-│   │   └── turn_detector.py       # Silero VAD + TurnDetector v1-mini + EMA
+│   │   ├── turn_detector.py       # Silero VAD + TurnDetector v1-mini + EMA
+│   │   └── voice_agent.py         # Sub-500ms WebRTC voice agent with barge-in
+│   ├── swarm/
+│   │   ├── graph.py               # LangGraph state machine with failure attribution
+│   │   └── postgres_saver.py      # Thread-scoped durable state checkpointer
 │   ├── memory/
+│   │   ├── carryon.py             # Context Compactor & Task Folder
 │   │   ├── echopath.py            # IBTR Replayable Memory Graph
-│   │   └── carryon.py             # Context Compactor & Task Folder
+│   │   ├── ui_evol.py             # UI-Evol Retrace & Critique knowledge adapter
+│   │   └── struct_verifier.py     # Causal Verification Engine & Evidence Gating
 │   ├── gateway/
 │   │   └── bifrost_client.py      # Ultra-low-latency Gateway Proxy Client
+│   ├── self_improvement/
+│   │   └── rsi_agent.py           # RSIAgent Broad-then-Deep exploration engine
 │   └── eval/
-│       └── agent_diff.py          # State-Diff Verification Engine
+│       ├── agent_diff.py          # State-Diff Verification Engine
+│       └── osworld_runner.py      # OSWorld 2.0 evaluation workflow harness
+├── tests/                         # 35 comprehensive unit & integration tests
 ├── pyproject.toml
 └── README.md
 ```
