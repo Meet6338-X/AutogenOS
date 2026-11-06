@@ -4,6 +4,9 @@ Exposes internal modules and open-source components (MCP, Browser-Use, LiveKit) 
 """
 
 from __future__ import annotations
+import os
+import sys
+import time
 import base64
 import asyncio
 import logging
@@ -27,6 +30,7 @@ from autogenos.eval.agent_diff import AgentDiffEvaluator, StateSnapshot
 from autogenos.components.mcp_bridge import AutogenOSMCPServer
 from autogenos.components.browser_agent import BrowserAgent
 from autogenos.components.livekit_bridge import LiveKitAgentBridge
+from autogenos.self_improvement.self_trainer import SelfTrainingEngine
 
 logger = logging.getLogger("autogenos.api")
 
@@ -57,6 +61,7 @@ rsi_engine = RSIAgentEngine()
 mcp_server = AutogenOSMCPServer()
 browser_agent = BrowserAgent()
 livekit_bridge = LiveKitAgentBridge(server=livekit_server)
+self_trainer = SelfTrainingEngine()
 
 
 # Request / Response Schemas
@@ -130,7 +135,8 @@ def get_root():
             "RSIAgent (Broad-then-Deep)",
             "AutogenOSMCPServer (Model Context Protocol)",
             "BrowserAgent (Browser-Use DOM-to-Markdown)",
-            "LiveKitAgentBridge (Local WebRTC Rooms)"
+            "LiveKitAgentBridge (Local WebRTC Rooms)",
+            "SelfTrainingEngine (Autonomous DPO & Reflexion)"
         ]
     }
 
@@ -138,7 +144,12 @@ def get_root():
 @app.post("/api/v1/orchestrator/run")
 async def run_orchestrator(req: RunIntentRequest):
     """Executes long-horizon intent through full Planner-Actor-Verifier closed loop."""
+    t0 = time.time()
     state = await swarm_controller.run_full_lifecycle(req.intent)
+    try:
+        self_trainer.process_completed_run(state, duration_sec=time.time() - t0)
+    except Exception as e:
+        logger.warning(f"Error recording trajectory in self_trainer: {e}")
     return {
         "session_id": state.session_id,
         "phase": state.phase.value,
@@ -305,6 +316,42 @@ async def trigger_rsi_exploration(req: ExploreRequest):
 def get_livekit_status():
     """Returns local LiveKit zero-cost configuration info."""
     return livekit_server.get_connection_info()
+
+
+@app.get("/api/v1/self-improvement/metrics")
+def get_self_training_metrics():
+    """Returns real-time metrics on autonomous self-training, DPO datasets, and reflection rules."""
+    return self_trainer.get_self_training_metrics()
+
+
+@app.post("/api/v1/self-improvement/export-dataset")
+def export_training_datasets(export_dir: str = ".autogenos/datasets"):
+    """Exports causally grounded DPO preference pairs and SFT multi-turn datasets."""
+    return self_trainer.export_training_datasets(export_dir=export_dir)
+
+
+@app.get("/api/v1/self-improvement/rules")
+def get_reflection_rules(query: Optional[str] = None):
+    """Returns episodic memory rules and failure-prevention heuristics."""
+    if query:
+        rules = self_trainer.reflector.query_relevant_rules(query)
+    else:
+        rules = list(self_trainer.reflector.rules.values())
+    return {"rules": [r.model_dump() for r in rules], "count": len(rules)}
+
+
+@app.post("/api/v1/self-improvement/induce-tools")
+def induce_reusable_tools(min_support: int = 2):
+    """Mines recurring action sequences across trajectories and synthesizes new reusable MCP tools."""
+    seqs = self_trainer.tool_inducer.identify_frequent_action_sequences(self_trainer.collector.trajectories, min_support=min_support)
+    synthesized = [
+        self_trainer.tool_inducer.synthesize_tool_scaffold(seq, f"auto_tool_{idx+1}")
+        for idx, seq in enumerate(seqs)
+    ]
+    return {
+        "frequent_sequences_count": len(seqs),
+        "synthesized_tools": synthesized
+    }
 
 
 @app.websocket("/api/v1/voice/stream")
