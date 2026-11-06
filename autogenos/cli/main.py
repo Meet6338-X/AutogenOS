@@ -25,6 +25,7 @@ from autogenos.core.system_doctor import SystemDoctor
 from autogenos.eval.benchmark_harness import BenchmarkHarness
 from autogenos.notifications.dispatcher import NotificationDispatcher, NotificationSeverity
 from autogenos.cli.repl import InteractiveCockpitREPL
+from autogenos.blocks import BlockManager, BlockType
 
 
 def print_banner():
@@ -331,6 +332,76 @@ def cmd_interactive(args):
     repl = InteractiveCockpitREPL()
     asyncio.run(repl.run_loop())
 
+
+def cmd_blocks(args):
+    mgr = BlockManager()
+    action = args.block_action or "list"
+
+    if action == "list":
+        b_type = BlockType(args.type.upper()) if getattr(args, "type", None) else None
+        blocks = mgr.list_blocks(block_type=b_type, enabled_only=getattr(args, "enabled_only", False))
+        print(f"\n[+] AutogenOS Modular Feature Blocks ({len(blocks)} registered):\n")
+        print(f"  {'ID':<34} | {'TYPE':<11} | {'STATUS':<9} | {'DESCRIPTION'}")
+        print("  " + "-" * 85)
+        for b in blocks:
+            st = "[ACTIVE]" if b.is_enabled else "[DISABLED]"
+            print(f"  {b.block_id:<34} | {b.block_type.value:<11} | {st:<9} | {b.metadata.description[:45]}")
+        print()
+
+    elif action == "info":
+        b = mgr.get_block(args.block_id)
+        if not b:
+            print(f"[!] Block '{args.block_id}' not found.")
+            return
+        print(f"\n--- BLOCK METADATA: {b.block_id} ---")
+        print(f"Name:         {b.metadata.name}")
+        print(f"Type:         {b.block_type.value}")
+        print(f"Status:       {b.metadata.status.value} (Enabled: {b.is_enabled})")
+        print(f"Version:      {b.metadata.version}")
+        print(f"Author:       {b.metadata.author}")
+        print(f"Description:  {b.metadata.description}")
+        print(f"Dependencies: {b.metadata.dependencies or 'None'}")
+        print(f"Tags:         {', '.join(b.metadata.tags) if b.metadata.tags else 'None'}\n")
+
+    elif action == "enable":
+        ok = mgr.enable_block(args.block_id)
+        print(f"[{'OK' if ok else 'FAIL'}] Block '{args.block_id}' {'enabled' if ok else 'not found'}.")
+
+    elif action == "disable":
+        ok = mgr.disable_block(args.block_id)
+        print(f"[{'OK' if ok else 'FAIL'}] Block '{args.block_id}' {'disabled' if ok else 'not found'}.")
+
+    elif action == "remove":
+        b = mgr.remove_block(args.block_id)
+        print(f"[{'OK' if b else 'FAIL'}] Block '{args.block_id}' {'removed' if b else 'not found'}.")
+
+    elif action == "add":
+        if getattr(args, "file", None):
+            b = mgr.add_block_from_file(args.file)
+            print(f"[+] Loaded block '{b.block_id}' from {args.file}")
+        elif getattr(args, "code", None):
+            b = mgr.add_block_from_code(args.code, block_id=getattr(args, "name", None))
+            print(f"[+] Compiled and registered block '{b.block_id}'")
+        else:
+            print("[!] Provide either --file or --code")
+
+    elif action == "exec":
+        import json
+        kwargs = {}
+        if getattr(args, "args", None):
+            try:
+                kwargs = json.loads(args.args)
+            except Exception as e:
+                print(f"[!] Invalid JSON in --args: {e}")
+                return
+        print(f"\n[+] Executing Block: '{args.block_id}' with {kwargs}...")
+        try:
+            res = asyncio.run(mgr.execute_block(args.block_id, **kwargs))
+            out_str = json.dumps(res, indent=2) if isinstance(res, (dict, list)) else str(res)
+            print(f"[Result] Status: SUCCESS\n{out_str}\n")
+        except Exception as e:
+            print(f"[!] Execution error: {e}")
+
 def cmd_serve(args):
     import uvicorn
     print(f"\n[+] Launching AutogenOS FastAPI & WebSocket Server on http://{args.host}:{args.port}")
@@ -420,6 +491,43 @@ def main():
     p_notif.add_argument("--channel", type=str, default="desktop", help="Target channels (comma-separated: desktop,webhook)")
     p_notif.add_argument("--webhook", type=str, default=None, help="Webhook URL (Slack, Discord, or generic)")
 
+    
+    # blocks command & subcommands
+    p_blocks = subparsers.add_parser("blocks", help="Modular Block System: list, add, remove, enable, disable, and execute blocks")
+    blocks_sub = p_blocks.add_subparsers(dest="block_action")
+
+    # blocks list
+    p_blist = blocks_sub.add_parser("list", help="List registered blocks")
+    p_blist.add_argument("--type", type=str, default=None, help="Filter by block type (TOOL, ACTION, PERCEPTION, EVAL)")
+    p_blist.add_argument("--enabled-only", action="store_true", help="Show only active blocks")
+
+    # blocks info
+    p_binfo = blocks_sub.add_parser("info", help="Display metadata for a block")
+    p_binfo.add_argument("block_id", type=str, help="Target block identifier")
+
+    # blocks enable
+    p_benable = blocks_sub.add_parser("enable", help="Enable a block")
+    p_benable.add_argument("block_id", type=str, help="Block identifier to enable")
+
+    # blocks disable
+    p_bdisable = blocks_sub.add_parser("disable", help="Disable a block")
+    p_bdisable.add_argument("block_id", type=str, help="Block identifier to disable")
+
+    # blocks remove
+    p_bremove = blocks_sub.add_parser("remove", help="Remove/unregister a block")
+    p_bremove.add_argument("block_id", type=str, help="Block identifier to remove")
+
+    # blocks add
+    p_badd = blocks_sub.add_parser("add", help="Register a new block from file or code")
+    p_badd.add_argument("--file", type=str, default=None, help="Path to Python source file")
+    p_badd.add_argument("--code", type=str, default=None, help="Inline Python source code")
+    p_badd.add_argument("--name", type=str, default=None, help="Block identifier")
+
+    # blocks exec
+    p_bexec = blocks_sub.add_parser("exec", help="Execute a block capability")
+    p_bexec.add_argument("block_id", type=str, help="Block identifier to execute")
+    p_bexec.add_argument("--args", type=str, default="{}", help="Execution arguments as JSON string")
+
     p_serve = subparsers.add_parser("serve", help="Launch FastAPI & WebSocket server")
     p_serve.add_argument("--host", type=str, default="127.0.0.1", help="Host address")
     p_serve.add_argument("--port", type=int, default=8000, help="Port number")
@@ -465,6 +573,8 @@ def main():
         cmd_interactive(args)
     elif args.command == "notify":
         cmd_notify(args)
+    elif args.command == "blocks":
+        cmd_blocks(args)
     elif args.command == "serve":
         cmd_serve(args)
     else:
