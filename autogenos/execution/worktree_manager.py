@@ -38,7 +38,7 @@ class WorktreeManager:
 
         cmd = [
             "git", "worktree", "add",
-            "-b", target_branch,
+            "-B", target_branch,
             str(target_path),
             "HEAD"
         ]
@@ -61,7 +61,7 @@ class WorktreeManager:
             self._active_worktrees[agent_id] = target_path
             return target_path
 
-    def remove_worktree(self, agent_id: str, force: bool = False) -> bool:
+    def remove_worktree(self, agent_id: str, force: bool = False, delete_branch: bool = True) -> bool:
         """Prunes and removes an agent's worktree."""
         target_path = self._active_worktrees.get(agent_id) or (self.worktrees_dir / agent_id)
         if not target_path.exists():
@@ -82,6 +82,14 @@ class WorktreeManager:
         except subprocess.CalledProcessError:
             if force and target_path.exists():
                 shutil.rmtree(target_path, ignore_errors=True)
+                subprocess.run(["git", "worktree", "prune"], cwd=str(self.repo_root), capture_output=True)
+
+        if delete_branch:
+            subprocess.run(
+                ["git", "branch", "-D", f"swarm/{agent_id}"],
+                cwd=str(self.repo_root),
+                capture_output=True
+            )
 
         if agent_id in self._active_worktrees:
             del self._active_worktrees[agent_id]
