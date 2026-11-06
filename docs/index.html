@@ -6,7 +6,49 @@
   <title>AutogenOS — Autonomous Multi-Agent Operating System Framework</title>
   <meta name="description" content="Recursive Self-Improving OS-Control Agent Swarm with Sub-500ms Real-Time Voice, Dynamic Tool Attention, and Deterministic Causal Grounding.">
   <link rel="icon" type="image/png" href="assets/logo.png">
-  <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: 'dark',
+          themeVariables: {
+            darkMode: true,
+            background: '#090e17',
+            primaryColor: '#1e293b',
+            primaryBorderColor: '#3b82f6',
+            primaryTextColor: '#f8fafc',
+            lineColor: '#60a5fa',
+            secondaryColor: '#1e293b',
+            tertiaryColor: '#0f172a'
+          }
+        });
+      }
+    });
+    async function togglePaperDiagram(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const wasOpen = el.classList.contains('open');
+      document.querySelectorAll('.paper-diagram-drawer').forEach(d => {
+        if (d.id !== id) d.classList.remove('open');
+      });
+      if (!wasOpen) {
+        el.classList.add('open');
+        if (window.mermaid && !el.dataset.rendered) {
+          try {
+            await mermaid.run({ nodes: el.querySelectorAll('.mermaid') });
+            el.dataset.rendered = "true";
+          } catch(e) {
+            console.warn("Mermaid render error:", e);
+          }
+        }
+      } else {
+        el.classList.remove('open');
+      }
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -466,10 +508,54 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
             <span>Download IEEE PDF (6 Pages)</span>
           </a>
+          <button type="button" class="btn-paper-diagram" onclick="togglePaperDiagram('diag-master')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <span>View Architecture Diagram</span>
+          </button>
           <a href="https://github.com/Meet6338-X/AutogenOS/blob/main/papers/00_master_architecture_blueprint.md" class="btn-paper-src" target="_blank" rel="noopener">
             <span>Markdown Source</span>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
           </a>
+        </div>
+        <div class="paper-diagram-drawer" id="diag-master">
+          <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Fig. 1: AutogenOS Unified Master Architecture & Swarm Control</div>
+          <div class="mermaid">
+graph TD
+    User([User Voice / Text / Telemetry]) -->|WebRTC &lt;500ms| VoicePipeline[Real-Time Voice Pipeline<br/>Silero VAD + TurnDetector v1-mini]
+    VoicePipeline --> Orchestrator[Orchestrator Node<br/>Master Operational Prompt Protocol]
+    User -->|Direct Intent / CLI| Orchestrator
+    
+    subgraph RoutingGateway ["Zero-Overhead Routing Layer"]
+        Orchestrator --> Bifrost[Bifrost Gateway ~11µs<br/>Dual-Layer Semantic Cache]
+    end
+
+    subgraph ToolAttention ["Project I: Tool Attention & Skills"]
+        Bifrost --> ToolGating[Tool Attention Gating<br/>MiniLM-L6-v2 Embeddings]
+        ToolGating -->|Lazy Schema Load| SkillsRegistry[Progressive Disclosure<br/>SKILLS.md Catalog]
+        SkillsRegistry --> CodeExecMCP[Code Execution with MCP<br/>Single-Pass Python/Bash Synthesis]
+    end
+
+    subgraph SwarmExecution ["Project II: Swarm & System Control"]
+        Orchestrator --> LangGraph[LangGraph Swarm Controller<br/>AsyncPostgresSaver State Machine]
+        LangGraph --> Subagent1[Actor Agent: Worktree Sandbox Alpha]
+        LangGraph --> Subagent2[Actor Agent: Worktree Sandbox Beta]
+        LangGraph --> VerifierAgent[Verifier Agent: Deterministic Evidence]
+        
+        Subagent1 --> OSControl[OS Accessibility Engine<br/>Win32/UIA, AT-SPI, macOS AX]
+        Subagent1 --> BrowserControl[cdp-use Chrome DevTools<br/>Pure WebSocket JSON-RPC]
+        Subagent2 --> Firecracker[Firecracker MicroVM<br/>Pre-warmed Snapshot ~150ms]
+    end
+
+    subgraph AcademicFoundation ["Project III: Memory & Self-Improvement"]
+        VerifierAgent -->|Causal Evidence| StructAgent[StructAgent / SolveBind<br/>Hierarchical Causal Graph]
+        StructAgent --> CarryOn[CarryOn Context Compactor<br/>Object-Oriented Folding]
+        StructAgent --> RSIAgent[RSIAgent Engine<br/>Broad-then-Deep Self-Exploration]
+        RSIAgent --> EchoPath[EchoPath Replayable Memory<br/>IBTR Target Reaiming + UI-Evol]
+    end
+
+    EchoPath -->|Deterministic Replay| Orchestrator
+    CarryOn -->|Pruned State Cache| Bifrost
+          </div>
         </div>
       </div>
 
@@ -496,10 +582,28 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
               <span>Download IEEE PDF</span>
             </a>
+            <button type="button" class="btn-paper-diagram" onclick="togglePaperDiagram('diag-p1')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <span>Diagram</span>
+            </button>
             <a href="https://github.com/Meet6338-X/AutogenOS/blob/main/papers/01_rsi_agent_broad_deep_exploration.md" class="btn-paper-src" target="_blank" rel="noopener">
               <span>Source</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
             </a>
+          </div>
+          <div class="paper-diagram-drawer" id="diag-p1">
+            <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:0.5rem; text-transform:uppercase; font-weight:700;">Fig. 1: RSIAgent Tripartite Dual-Stage Exploration</div>
+            <div class="mermaid">
+flowchart TD
+    Idle["Idle Compute Detected"] --> Curr["Curriculum Agent"]
+    Curr -->|Stage 1: Broad| Actor1["Actor Agent (Code-as-Policy)"]
+    Curr -->|Stage 2: Deep| Actor2["Actor Agent (Boundary Stress)"]
+    Actor1 & Actor2 --> Env["OS Environment Telemetry"]
+    Env --> Verifier["Verifier Agent"]
+    Verifier -->|Validation PASS| Echo["EchoPath Replay Compilation"]
+    Verifier -->|Validation FAIL| Repair["Failure Attribution & Repair"]
+    Repair -->|Feedback| Curr
+            </div>
           </div>
         </div>
 
@@ -524,10 +628,28 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
               <span>Download IEEE PDF</span>
             </a>
+            <button type="button" class="btn-paper-diagram" onclick="togglePaperDiagram('diag-p2')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <span>Diagram</span>
+            </button>
             <a href="https://github.com/Meet6338-X/AutogenOS/blob/main/papers/02_eliminating_the_mcp_tax_tool_attention.md" class="btn-paper-src" target="_blank" rel="noopener">
               <span>Source</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
             </a>
+          </div>
+          <div class="paper-diagram-drawer" id="diag-p2">
+            <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:0.5rem; text-transform:uppercase; font-weight:700;">Fig. 1: Code Execution with MCP vs Naive Chat Loops</div>
+            <div class="mermaid">
+flowchart TB
+    subgraph TraditionalMCP ["Traditional MCP Multi-Turn Bloat"]
+        M1["LLM Context"] -->|Call Tool| S1["MCP Server"]
+        S1 -->|50k Tokens Payload| M1
+    end
+    subgraph AutogenOSMCP ["AutogenOS Single-Pass Sandbox"]
+        M2["LLM Context"] -->|Single Script| Sandbox["Isolated Sandbox<br/>(RAM & Disk)"]
+        Sandbox -->|SHA-256 State Diff &lt;2.5k tokens| M2
+    end
+            </div>
           </div>
         </div>
 
@@ -536,7 +658,7 @@
           <div>
             <div class="paper-tag-row">
               <span class="paper-id">IEEE-TAS-03</span>
-              <span class="paper-meta-badge">2 PAGES (IEEE 2-COL)</span>
+              <span class="paper-meta-badge">3 PAGES (IEEE 2-COL)</span>
             </div>
             <div class="paper-author-row">
               <span class="paper-author-avatar">M</span>
@@ -552,10 +674,26 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
               <span>Download IEEE PDF</span>
             </a>
+            <button type="button" class="btn-paper-diagram" onclick="togglePaperDiagram('diag-p3')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <span>Diagram</span>
+            </button>
             <a href="https://github.com/Meet6338-X/AutogenOS/blob/main/papers/03_struct_agent_deterministic_causal_evidence.md" class="btn-paper-src" target="_blank" rel="noopener">
               <span>Source</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
             </a>
+          </div>
+          <div class="paper-diagram-drawer" id="diag-p3">
+            <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:0.5rem; text-transform:uppercase; font-weight:700;">Fig. 1: StructAgent Verifier-Backed State Machine</div>
+            <div class="mermaid">
+flowchart TD
+    User["User Intent"] --> Planner["Planner Node"]
+    Planner --> Actor["Actor Node (Isolated Worktree)"]
+    Actor -->|Proposed Diff| Verifier["Verifier Node"]
+    Verifier -->|Evidence Valid| Commit["Commit State (Durable Checkpointer)"]
+    Verifier -->|Invalid| Repair["Dynamic Attribution & Repair"]
+    Repair --> Planner
+            </div>
           </div>
         </div>
 
@@ -564,7 +702,7 @@
           <div>
             <div class="paper-tag-row">
               <span class="paper-id">IEEE-TAS-04</span>
-              <span class="paper-meta-badge">2 PAGES (IEEE 2-COL)</span>
+              <span class="paper-meta-badge">3 PAGES (IEEE 2-COL)</span>
             </div>
             <div class="paper-author-row">
               <span class="paper-author-avatar">M</span>
@@ -580,10 +718,29 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
               <span>Download IEEE PDF</span>
             </a>
+            <button type="button" class="btn-paper-diagram" onclick="togglePaperDiagram('diag-p4')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <span>Diagram</span>
+            </button>
             <a href="https://github.com/Meet6338-X/AutogenOS/blob/main/papers/04_echopath_ui_evol_execution_replay.md" class="btn-paper-src" target="_blank" rel="noopener">
               <span>Source</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
             </a>
+          </div>
+          <div class="paper-diagram-drawer" id="diag-p4">
+            <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:0.5rem; text-transform:uppercase; font-weight:700;">Fig. 1: EchoPath IBTR & UI-Evol Architecture</div>
+            <div class="mermaid">
+flowchart TD
+    Traj["Validated GUI Trajectory"] --> Comp["EchoPath Schema Compiler"]
+    Comp --> DB[("Replayable Memory DB")]
+    DB --> Replay["Replay Triggered"]
+    Replay --> IBTR["IBTR Reaiming Engine"]
+    Screen["Desktop Framebuffer"] --> IBTR
+    IBTR --> Eval{"NCC Match &ge; 0.92"}
+    Eval -->|Match Valid| Exec["Instant Direct Execution (&lt;10ms)"]
+    Eval -->|Mismatch / UI Shift| Evol["UI-Evol Dynamic VLM Repair"]
+    Evol --> DB
+            </div>
           </div>
         </div>
 
@@ -608,10 +765,28 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
               <span>Download IEEE PDF</span>
             </a>
+            <button type="button" class="btn-paper-diagram" onclick="togglePaperDiagram('diag-p5')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <span>Diagram</span>
+            </button>
             <a href="https://github.com/Meet6338-X/AutogenOS/blob/main/papers/05_carryon_object_oriented_context_compaction.md" class="btn-paper-src" target="_blank" rel="noopener">
               <span>Source</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
             </a>
+          </div>
+          <div class="paper-diagram-drawer" id="diag-p5">
+            <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:0.5rem; text-transform:uppercase; font-weight:700;">Fig. 1: CarryOn Object-Oriented Context Compaction</div>
+            <div class="mermaid">
+flowchart TB
+    subgraph TraditionalLinear ["Traditional History (85k Tokens)"]
+        T1["Turn 1"] --> T2["Turn 2"] --> T150["Turn 150 (KV Bloat)"]
+    end
+    subgraph CarryOnCompaction ["CarryOn Compaction"]
+        Branch["Subtask Turns 1..12"] -->|Verifier PASS| Compactor["CarryOn Compactor F"]
+        Compactor --> Folded["FoldedTaskObject (45 Tokens)<br/>&bull; ID: env_setup_01 &bull; SHA-256 Validated"]
+        Folded --> Active["Active State Object"]
+    end
+            </div>
           </div>
         </div>
       </div>

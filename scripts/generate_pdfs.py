@@ -26,6 +26,7 @@ IEEE_TEMPLATE = """<!DOCTYPE html>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     @page {
       size: A4;
@@ -199,6 +200,42 @@ IEEE_TEMPLATE = """<!DOCTYPE html>
       text-indent: 0;
     }
 
+    /* IEEE Figures & Diagrams */
+    figure.ieee-figure {
+      margin: 12px 0 10px 0;
+      padding: 6px 4px;
+      background: #ffffff;
+      border: 0.6px solid #cbd5e1;
+      border-radius: 4px;
+      column-span: all;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      display: block;
+      text-align: center;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .mermaid svg {
+      max-width: 96% !important;
+      max-height: 290px;
+      height: auto !important;
+      display: block;
+      margin: 0 auto;
+    }
+    figcaption.ieee-caption {
+      font-size: 7.8pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 6px;
+      text-align: center;
+      font-style: italic;
+    }
+
     /* IEEE Tables */
     table {
       width: 100%;
@@ -301,6 +338,20 @@ IEEE_TEMPLATE = """<!DOCTYPE html>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      if (typeof mermaid !== 'undefined') {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'neutral',
+          themeVariables: {
+            fontFamily: 'Tinos, Times New Roman, serif',
+            fontSize: '11px',
+            primaryColor: '#f8fafc',
+            primaryBorderColor: '#0f172a',
+            primaryTextColor: '#0f172a',
+            lineColor: '#334155'
+          }
+        });
+      }
       if (typeof renderMathInElement !== 'undefined') {
         renderMathInElement(document.body, {
           delimiters: [
@@ -365,6 +416,31 @@ def format_ieee_headings(html):
     html = re.sub(r'<h3>(.*?)</h3>', repl_h3, html)
     return html
 
+def convert_mermaid_and_figures(html):
+    def repl_mermaid(match):
+        code = match.group(1).strip()
+        code = (
+            code.replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&")
+                .replace("&quot;", '"')
+        )
+        return f'<figure class="ieee-figure"><div class="mermaid">\n{code}\n</div></figure>'
+
+    html = re.sub(r'<pre><code class="language-mermaid">([\s\S]+?)</code></pre>', repl_mermaid, html)
+
+    def repl_caption(match):
+        fig_html = match.group(1)
+        cap_text = match.group(2).strip()
+        return f'{fig_html[:-9]}<figcaption class="ieee-caption">{cap_text}</figcaption></figure>'
+
+    html = re.sub(
+        r'(<figure class="ieee-figure">[\s\S]+?</figure>)\s*<p><em>(Fig\.\s*\d+[\s\S]*?)</em></p>',
+        repl_caption,
+        html
+    )
+    return html
+
 def process_ieee_paper(file_path, paper_id, index_terms):
     with open(file_path, "r", encoding="utf-8") as f:
         raw_text = f.read()
@@ -395,6 +471,7 @@ def process_ieee_paper(file_path, paper_id, index_terms):
     raw_html = markdown.markdown(protected, extensions=['tables', 'fenced_code', 'nl2br'])
     body_html = restore_math(raw_html, disp, inline)
     body_html = format_ieee_headings(body_html)
+    body_html = convert_mermaid_and_figures(body_html)
 
     full_html = (
         IEEE_TEMPLATE
@@ -411,6 +488,21 @@ def process_ieee_paper(file_path, paper_id, index_terms):
 async def generate_pdf(browser, html_content, output_pdf_path, short_title):
     page = await browser.new_page()
     await page.set_content(html_content, wait_until="networkidle")
+
+    # Wait for all Mermaid SVGs to finish rendering if diagrams exist
+    mermaid_count = await page.locator(".mermaid").count()
+    if mermaid_count > 0:
+        try:
+            await page.wait_for_selector(".mermaid svg", timeout=20000)
+            for _ in range(25):
+                svg_count = await page.locator(".mermaid svg").count()
+                if svg_count >= mermaid_count:
+                    break
+                await page.wait_for_timeout(400)
+            print(f"  -> Rendered {svg_count}/{mermaid_count} Mermaid diagram SVGs")
+        except Exception as e:
+            print(f"  -> Warning waiting for Mermaid diagrams: {e}")
+
     await page.wait_for_timeout(1000)
 
     header_template = f'''

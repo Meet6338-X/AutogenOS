@@ -26,50 +26,39 @@ To overcome these structural limitations, we propose **RSIAgent**, an autonomous
 
 ## 2. Theoretical Formulation & Architecture
 
+```mermaid
+flowchart TD
+    subgraph Trigger ["Execution Trigger"]
+        Idle["Idle System Compute Cycle Detected<br/>CPU &lt; 15%, No Active User I/O"]
+    end
+
+    subgraph TripartiteCore ["RSIAgent Tripartite Autonomous Core"]
+        Curr["Curriculum Agent<br/>(Task Generation & Exploration DAG)"]
+        Actor1["Actor Agent (Stage-1)<br/>Broad Exploration / Code-as-Policy Gen"]
+        Actor2["Actor Agent (Stage-2)<br/>Deep Boundary Stress & Adversarial Edge"]
+        Verifier["Verifier Agent<br/>Deterministic Grounding & System Invariants"]
+    end
+
+    subgraph OSGrounding ["Cross-Platform Environment Execution"]
+        Env["Environment Telemetry Bridge<br/>Win32 UIA / AT-SPI / WebSocket CDP / MicroVM"]
+    end
+
+    subgraph Outcome ["Policy Compilation & Repair"]
+        Echo["EchoPath Frozen Policy Graph<br/>Deterministic Schema Replay"]
+        Repair["Failure Attribution<br/>Dynamic Reflexion & DAG Repair"]
+    end
+
+    Idle --> Curr
+    Curr -->|Stage 1: Breadth| Actor1
+    Curr -->|Stage 2: Depth| Actor2
+    Actor1 --> Env
+    Actor2 --> Env
+    Env -->|Raw Ground Truth Telemetry| Verifier
+    Verifier -->|Validation PASS (Exit 0 + SHA-256)| Echo
+    Verifier -->|Validation FAIL (Divergence Detected)| Repair
+    Repair -->|Feedback Loop| Curr
 ```
-+-------------------------------------------------------------------------+
-|                              RSIAGENT CORE                              |
-+-------------------------------------------------------------------------+
-                                     |
-                [Idle System Compute Cycle Detected]
-                                     |
-                                     v
-                       +---------------------------+
-                       |     Curriculum Agent      |
-                       | (Task Generation & DAG)   |
-                       +---------------------------+
-                                     |
-               +---------------------+---------------------+
-               | Stage-1: Broad Exploration                | Stage-2: Deep Boundary Stress
-               v                                           v
-    +----------------------+                    +----------------------+
-    |     Actor Agent      |                    |     Actor Agent      |
-    | (Code-as-Policy Gen) |                    | (Adversarial Edge)   |
-    +----------------------+                    +----------------------+
-               |                                           |
-               v                                           v
-    +------------------------------------------------------------------+
-    |                     Environment Execution                        |
-    |          (Win32 / UIA / AT-SPI / WebSocket CDP / MicroVM)        |
-    +------------------------------------------------------------------+
-                                     |
-                        [Raw Environmental Telemetry]
-                                     v
-                       +---------------------------+
-                       |      Verifier Agent       |
-                       |  (Grounding & Invariants) |
-                       +---------------------------+
-                                     |
-                       +-------------+-------------+
-                       |                           |
-                  [Validated]                 [Rejected]
-                       |                           |
-                       v                           v
-         +---------------------------+   +-------------------+
-         | EchoPath Replay Compilation|   | Failure Attribution
-         | & Frozen Policy Graph     |   | & Dynamic Repair  |
-         +---------------------------+   +-------------------+
-```
+*Fig. 1. RSIAgent Tripartite Autonomous Architecture: Dual-Stage Exploration (Broad & Deep) with Deterministic Causal Grounding.*
 
 ### 2.1 Tripartite Agent Decomposition
 
