@@ -18,7 +18,7 @@
 <p align="center">
   <a href="https://github.com/Meet6338-X/AutogenOS/actions/workflows/deploy-pages.yml"><img src="https://github.com/Meet6338-X/AutogenOS/actions/workflows/deploy-pages.yml/badge.svg" alt="Deploy GitHub Pages"/></a>
   <a href="https://github.com/Meet6338-X/AutogenOS/actions/workflows/ci.yml"><img src="https://github.com/Meet6338-X/AutogenOS/actions/workflows/ci.yml/badge.svg" alt="CI & Tests"/></a>
-  <a href="https://github.com/Meet6338-X/AutogenOS/actions"><img src="https://img.shields.io/badge/tests-83%20passed%20%7C%20100%25-brightgreen.svg?style=flat&logo=pytest&logoColor=white" alt="Tests"/></a>
+  <a href="https://github.com/Meet6338-X/AutogenOS/actions"><img src="https://img.shields.io/badge/tests-88%20passed%20%7C%20100%25-brightgreen.svg?style=flat&logo=pytest&logoColor=white" alt="Tests"/></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB.svg?style=flat&logo=python&logoColor=white" alt="Python 3.11+"/></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg?style=flat" alt="Platforms"/>
   <img src="https://img.shields.io/badge/voice-LiveKit%20%3C500ms-FF4F00.svg?style=flat&logo=webrtc&logoColor=white" alt="Voice Latency"/>
@@ -222,6 +222,8 @@ autogenos --help
 | **`doctor`** | `autogenos doctor` | Run comprehensive end-to-end system diagnostic across OS bridges, MCP tools, and runtime. |
 | **`eval`** | `autogenos eval [--suite S] [--output O]` | Run empirical benchmark suites across OSWorld, Agent-Diff, and Tool Attention. |
 | **`train`** | `autogenos train [--mode M] [--epochs E]` | Launch local LoRA/DPO fine-tuning pass on recorded execution trajectories. |
+| **`interactive`** | `autogenos interactive` (or `repl`) | Launch interactive multi-turn terminal cockpit with slash commands (`/doctor`, `/eval`, `/train`, `/tools`). |
+| **`notify`** | `autogenos notify "<message>" [--title T]` | Dispatch mission alerts to Native Desktop Toasts, Slack, or Discord webhooks. |
 | **`serve`** | `autogenos serve [--host H] [--port P]` | Start high-throughput FastAPI REST & WebSocket server. |
 
 #### CLI Examples
@@ -275,6 +277,7 @@ autogenos serve --host 127.0.0.1 --port 8000
 | **REST** | `POST /api/v1/eval/run` | Execute a specific benchmark evaluation suite (`osworld`, `agent-diff`, `all`). |
 | **REST** | `POST /api/v1/voice/speak` | Synthesize zero-latency local speech via offline Windows SAPI5 / offline TTS. |
 | **REST** | `GET  /api/v1/os/windows` | List all visible host desktop application windows with handles and bounds. |
+| **REST** | `POST /api/v1/notifications/send` | Dispatch mission alert to native desktop toasts, Slack, or Discord webhooks. |
 | **WS** | `WS   /api/v1/voice/stream` | Sub-500ms continuous streaming WebRTC voice WebSocket with Silero VAD. |
 | **WS** | `WS   /api/v1/swarm/telemetry` | Real-time event feed for live execution dashboards and telemetry.
 

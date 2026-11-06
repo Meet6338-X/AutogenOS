@@ -23,6 +23,8 @@ from autogenos.components.browser_agent import BrowserAgent, WebContentDistiller
 from autogenos.self_improvement.self_trainer import SelfTrainingEngine, LoRATrainingConfig
 from autogenos.core.system_doctor import SystemDoctor
 from autogenos.eval.benchmark_harness import BenchmarkHarness
+from autogenos.notifications.dispatcher import NotificationDispatcher, NotificationSeverity
+from autogenos.cli.repl import InteractiveCockpitREPL
 
 
 def print_banner():
@@ -304,6 +306,31 @@ def cmd_train(args):
     print(f"Unsloth Recipe:     {res.recipe_script_path}")
 
 
+
+def cmd_notify(args):
+    dispatcher = NotificationDispatcher(default_webhook_url=args.webhook)
+    title = args.title or "AutogenOS Swarm Notification"
+    body = args.message
+    channels = [c.strip() for c in args.channel.split(",")]
+    print(f"\n[+] Dispatching Notification to {channels}:")
+    print(f"    Title: {title}")
+    print(f"    Body:  {body}")
+    res = dispatcher.dispatch(
+        title=title,
+        body=body,
+        severity=args.severity.upper(),
+        channels=channels,
+        webhook_url=args.webhook
+    )
+    for ch, ok in res.items():
+        st = "[OK]" if ok else "[FAILED]"
+        print(f"    {st} Channel: {ch}")
+
+
+def cmd_interactive(args):
+    repl = InteractiveCockpitREPL()
+    asyncio.run(repl.run_loop())
+
 def cmd_serve(args):
     import uvicorn
     print(f"\n[+] Launching AutogenOS FastAPI & WebSocket Server on http://{args.host}:{args.port}")
@@ -381,6 +408,18 @@ def main():
     p_st.add_argument("--train", action="store_true", help="Trigger immediate local LoRA/DPO adapter training pass")
 
     # serve command
+    
+    # interactive / repl command
+    p_repl = subparsers.add_parser("interactive", aliases=["repl"], help="Launch interactive multi-turn terminal cockpit")
+
+    # notify command
+    p_notif = subparsers.add_parser("notify", help="Dispatch notification to desktop toasts or webhooks")
+    p_notif.add_argument("message", type=str, help="Notification body text")
+    p_notif.add_argument("--title", type=str, default="AutogenOS Mission Alert", help="Notification title")
+    p_notif.add_argument("--severity", type=str, default="INFO", choices=["INFO", "SUCCESS", "WARNING", "CRITICAL"], help="Alert severity")
+    p_notif.add_argument("--channel", type=str, default="desktop", help="Target channels (comma-separated: desktop,webhook)")
+    p_notif.add_argument("--webhook", type=str, default=None, help="Webhook URL (Slack, Discord, or generic)")
+
     p_serve = subparsers.add_parser("serve", help="Launch FastAPI & WebSocket server")
     p_serve.add_argument("--host", type=str, default="127.0.0.1", help="Host address")
     p_serve.add_argument("--port", type=int, default=8000, help="Port number")
@@ -422,6 +461,10 @@ def main():
         cmd_eval(args)
     elif args.command == "train":
         cmd_train(args)
+    elif args.command in ["interactive", "repl"]:
+        cmd_interactive(args)
+    elif args.command == "notify":
+        cmd_notify(args)
     elif args.command == "serve":
         cmd_serve(args)
     else:

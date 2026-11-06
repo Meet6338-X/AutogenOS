@@ -33,6 +33,7 @@ from autogenos.components.livekit_bridge import LiveKitAgentBridge
 from autogenos.self_improvement.self_trainer import SelfTrainingEngine, LoRATrainingConfig
 from autogenos.core.system_doctor import SystemDoctor
 from autogenos.eval.benchmark_harness import BenchmarkHarness
+from autogenos.notifications.dispatcher import NotificationDispatcher
 
 logger = logging.getLogger("autogenos.api")
 
@@ -66,6 +67,7 @@ livekit_bridge = LiveKitAgentBridge(server=livekit_server)
 self_trainer = SelfTrainingEngine()
 doctor = SystemDoctor()
 benchmark_harness = BenchmarkHarness()
+notifier = NotificationDispatcher()
 
 
 # Request / Response Schemas
@@ -106,6 +108,15 @@ class EvalRunRequest(BaseModel):
     suite: str = "all"  # "osworld", "agent-diff", "tool-attention", "all"
     output_file: Optional[str] = None
 
+
+
+
+class NotificationRequest(BaseModel):
+    title: str = "AutogenOS Swarm Alert"
+    message: str
+    severity: str = "INFO"
+    channels: List[str] = Field(default_factory=lambda: ["desktop"])
+    webhook_url: Optional[str] = None
 
 class TrainModelRequest(BaseModel):
     base_model: str = "meta-llama/Llama-3.2-3B-Instruct"
@@ -424,6 +435,24 @@ def get_training_runs():
     return {
         "training_runs": [r.model_dump() for r in self_trainer.training_runs],
         "count": len(self_trainer.training_runs)
+    }
+
+
+
+
+@app.post("/api/v1/notifications/send")
+def send_notification(req: NotificationRequest):
+    """Dispatches real-time mission alert to desktop toasts, Slack, or Discord webhooks."""
+    res = notifier.dispatch(
+        title=req.title,
+        body=req.message,
+        severity=req.severity,
+        channels=req.channels,
+        webhook_url=req.webhook_url
+    )
+    return {
+        "status": "DISPATCHED",
+        "results": res
     }
 
 
