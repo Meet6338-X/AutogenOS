@@ -1,6 +1,6 @@
 """
 Comprehensive High-Performance FastAPI and WebSocket Server for AutogenOS.
-Exposes every internal module and open-source component as a callable API and WebSocket service.
+Exposes internal modules and open-source components (MCP, Browser-Use, LiveKit) as callable APIs and WebSockets.
 """
 
 from __future__ import annotations
@@ -24,6 +24,9 @@ from autogenos.components.livekit_local import LocalLiveKitServer
 from autogenos.control.os_controller import OSController
 from autogenos.self_improvement.rsi_agent import RSIAgentEngine
 from autogenos.eval.agent_diff import AgentDiffEvaluator, StateSnapshot
+from autogenos.components.mcp_bridge import AutogenOSMCPServer
+from autogenos.components.browser_agent import BrowserAgent
+from autogenos.components.livekit_bridge import LiveKitAgentBridge
 
 logger = logging.getLogger("autogenos.api")
 
@@ -51,6 +54,9 @@ os_ctrl = OSController()
 livekit_server = LocalLiveKitServer()
 swarm_controller = SwarmGraphController(tool_engine=tool_engine)
 rsi_engine = RSIAgentEngine()
+mcp_server = AutogenOSMCPServer()
+browser_agent = BrowserAgent()
+livekit_bridge = LiveKitAgentBridge(server=livekit_server)
 
 
 # Request / Response Schemas
@@ -89,6 +95,21 @@ class ExploreRequest(BaseModel):
     targets: List[str] = Field(default_factory=lambda: ["TextEditor", "Terminal", "Settings"])
 
 
+class MCPCallRequest(BaseModel):
+    name: str
+    arguments: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ScrapeRequest(BaseModel):
+    url: Optional[str] = None
+    html: Optional[str] = None
+
+
+class LiveKitTokenRequest(BaseModel):
+    room_name: str = "autogenos-room"
+    identity: str = "user-client"
+
+
 @app.get("/")
 def get_root():
     return {
@@ -97,6 +118,7 @@ def get_root():
         "platform": os_ctrl.platform_name.upper(),
         "status": "OPERATIONAL",
         "livekit_local": livekit_server.get_connection_info(),
+        "mcp_tools_available": len(mcp_server.get_supported_tools()),
         "active_components": [
             "ToolAttentionEngine",
             "SwarmGraphController (LangGraph)",
@@ -105,7 +127,10 @@ def get_root():
             "TerminalRunner (RTK Compressed)",
             "ScreenVisionEngine (PIL IBTR)",
             "OSController (Native Accessibility)",
-            "RSIAgent (Broad-then-Deep)"
+            "RSIAgent (Broad-then-Deep)",
+            "AutogenOSMCPServer (Model Context Protocol)",
+            "BrowserAgent (Browser-Use DOM-to-Markdown)",
+            "LiveKitAgentBridge (Local WebRTC Rooms)"
         ]
     }
 
@@ -148,56 +173,105 @@ def gate_tools(req: ToolGateRequest):
             }
             for t in promoted
         ],
+        "metrics": metrics,
         "mcp_tax_metrics": metrics
     }
 
 
-@app.post("/api/v1/voice/speak")
-def speak_text(req: SpeakRequest):
-    """Speaks text through local zero-cost TTS (Windows SAPI5 or offline synthesizer)."""
-    success = local_tts.speak(req.text, asynchronous=req.async_speak)
-    return {"spoken": success, "text": req.text, "mode": "100% LOCAL OFFLINE"}
+@app.get("/api/v1/mcp/tools")
+def get_mcp_tools():
+    """Lists all tools exposed by AutogenOS Model Context Protocol server."""
+    return {"tools": mcp_server.get_supported_tools()}
 
 
-@app.post("/api/v1/voice/stop")
-def stop_speaking():
-    """Barge-in interrupt: instantly halts TTS playback."""
-    local_tts.stop()
-    return {"stopped": True}
+@app.post("/api/v1/mcp/call")
+def call_mcp_tool(req: MCPCallRequest):
+    """Executes a tool call using the standard Model Context Protocol schema."""
+    return mcp_server.handle_tools_call(req.name, req.arguments)
 
 
+@app.post("/api/v1/mcp/jsonrpc")
+def handle_mcp_jsonrpc(payload: Dict[str, Any]):
+    """Standard JSON-RPC 2.0 endpoint for external MCP clients."""
+    return mcp_server.process_jsonrpc_request(payload)
+
+
+@app.post("/api/v1/browser/extract-markdown")
+async def extract_page_markdown(req: ScrapeRequest):
+    """Extracts clean structured Markdown and interactive UI targets from a URL or raw HTML."""
+    if req.html:
+        from autogenos.components.browser_agent import WebContentDistiller
+        md = WebContentDistiller.html_to_markdown(req.html)
+        interactive = [e.to_dict() for e in WebContentDistiller.extract_interactive_elements(req.html)]
+        return {
+            "url": req.url or "direct_html",
+            "markdown": md,
+            "interactive_elements": interactive,
+            "interactive_count": len(interactive),
+        }
+    url = req.url or "about:blank"
+    return await browser_agent.navigate_and_extract_markdown(url)
+
+
+@app.post("/api/v1/livekit/token")
+def generate_livekit_token(req: LiveKitTokenRequest):
+    """Generates a 100% free local LiveKit WebRTC authentication token."""
+    return livekit_bridge.get_connection_credentials(room_name=req.room_name, identity=req.identity)
+
+
+@app.post("/api/v1/terminal/execute")
 @app.post("/api/v1/terminal/exec")
-def execute_terminal(req: TerminalExecRequest):
-    """Executes shell command with real-time output and RTK token compression."""
-    result = terminal_runner.execute(req.command, cwd=req.cwd, timeout=req.timeout)
-    return result
+def execute_terminal_cmd(req: TerminalExecRequest):
+    """Executes arbitrary CLI command with token compression."""
+    return terminal_runner.execute(req.command, cwd=req.cwd, timeout=req.timeout)
 
 
 @app.get("/api/v1/os/windows")
-def list_open_windows():
-    """Enumerates visible top-level windows on host system."""
-    windows = os_ctrl.list_windows()
-    return {"count": len(windows), "windows": windows}
+def list_desktop_windows():
+    """Lists visible windows across host OS."""
+    return {"windows": os_ctrl.list_windows()}
 
 
+@app.get("/api/v1/os/active-window")
 @app.get("/api/v1/os/active")
 def get_active_window():
-    """Gets details and coordinates of currently focused window."""
+    """Returns foreground window handle, title, and coordinates."""
     return os_ctrl.get_active_window()
 
 
+@app.post("/api/v1/os/focus")
+def focus_window_by_title(query: str):
+    """Brings window matching title substring into focus."""
+    success = os_ctrl.focus_window(query)
+    return {"success": success, "query": query}
+
+
 @app.post("/api/v1/os/click")
-def click_mouse(req: ClickRequest):
-    """Injects hardware-level mouse click."""
+def click_coordinate(req: ClickRequest):
+    """Injects hardware-level mouse click into OS."""
     success = os_ctrl.click_coordinate(req.x, req.y, req.button)
-    return {"success": success, "x": req.x, "y": req.y, "button": req.button}
+    return {"success": success, "x": req.x, "y": req.y}
 
 
 @app.post("/api/v1/os/type")
-def type_keystrokes(req: TypeRequest):
-    """Injects hardware keystrokes."""
+def type_text(req: TypeRequest):
+    """Injects hardware-level keystrokes into focused window."""
     success = os_ctrl.type_text(req.text)
     return {"success": success, "text": req.text}
+
+
+@app.post("/api/v1/voice/speak")
+def speak_local_tts(req: SpeakRequest):
+    """Synthesizes zero-cost local speech via Windows SAPI5 or offline TTS."""
+    success = local_tts.speak(req.text, asynchronous=req.async_speak)
+    return {"success": success, "text": req.text, "mode": "100% LOCAL OFFLINE"}
+
+
+@app.post("/api/v1/voice/stop")
+def stop_voice():
+    """Stops any currently active speech synthesis."""
+    local_tts.stop()
+    return {"stopped": True}
 
 
 @app.get("/api/v1/os/screenshot")
@@ -235,10 +309,7 @@ def get_livekit_status():
 
 @app.websocket("/api/v1/voice/stream")
 async def websocket_voice_stream(websocket: WebSocket):
-    """
-    Sub-500ms real-time voice streaming WebSocket.
-    Clients send audio/text frames and receive streaming tokens and synthesized audio chunks.
-    """
+    """Sub-500ms real-time voice streaming WebSocket."""
     await websocket.accept()
     from autogenos.voice.voice_agent import ContinuousVoiceAgent
     agent = ContinuousVoiceAgent()
@@ -247,8 +318,6 @@ async def websocket_voice_stream(websocket: WebSocket):
         while True:
             data = await websocket.receive_json()
             intent = data.get("prompt", "System check")
-            
-            # Stream response chunks with sub-500ms TTFA
             async for chunk in agent.stream_agent_turn(intent):
                 await websocket.send_json(chunk)
     except WebSocketDisconnect:
