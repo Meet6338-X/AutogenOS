@@ -37,7 +37,7 @@ class WorktreeManager:
             return target_path
 
         cmd = [
-            "git", "worktree", "add",
+            "git", "-c", "core.longpaths=true", "worktree", "add",
             "-B", target_branch,
             str(target_path),
             "HEAD"
@@ -67,7 +67,7 @@ class WorktreeManager:
         if not target_path.exists():
             return False
 
-        cmd = ["git", "worktree", "remove", str(target_path)]
+        cmd = ["git", "-c", "core.longpaths=true", "worktree", "remove", str(target_path)]
         if force:
             cmd.append("--force")
 

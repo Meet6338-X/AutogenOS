@@ -29,7 +29,5 @@ ENV/
 .coverage
 htmlcov/
 
-# AutogenOS ephemeral worktrees & runtime sandboxes
-.autogenos/worktrees/
-.autogenos/snapshots/
-.autogenos/recordings/
+# AutogenOS ephemeral worktrees, runtime sandboxes, trajectories & datasets
+.autogenos/
