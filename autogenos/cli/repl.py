@@ -1,7 +1,7 @@
 """
 AutogenOS Interactive Terminal Cockpit & Natural Language REPL.
 Provides an interactive multi-turn session with slash commands, live streaming telemetry,
-and direct access to all internal subsystems (Doctor, Eval, LoRA Training, MCP, Voice).
+and direct access to all internal subsystems (Doctor, Eval, LoRA Training, MCP, Voice, Blocks).
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from autogenos.self_improvement.self_trainer import SelfTrainingEngine, LoRATrai
 from autogenos.components.mcp_bridge import AutogenOSMCPServer
 from autogenos.control.os_controller import OSController
 from autogenos.components.local_tts import LocalTTS
+from autogenos.blocks import BlockManager
 
 
 class InteractiveCockpitREPL:
@@ -33,6 +34,7 @@ class InteractiveCockpitREPL:
         self.mcp_server = AutogenOSMCPServer()
         self.os_ctrl = OSController()
         self.tts = LocalTTS()
+        self.block_manager = BlockManager()
         self.session_history = []
 
     def print_welcome(self):
@@ -45,6 +47,7 @@ class InteractiveCockpitREPL:
     /doctor        Run complete system diagnostics & bridge health check
     /eval          Run empirical benchmark suites (OSWorld, Agent-Diff)
     /train         Launch local LoRA/DPO model fine-tuning pass
+    /blocks        List registered modular feature blocks
     /tools         List all native MCP tools (JSON-RPC 2.0)
     /status        Display host OS active window focus & accessibility
     /speak <text>  Speak text via 100% free local TTS
@@ -61,6 +64,7 @@ Available Slash Commands:
   /doctor          - Inspect Python, OS, Git long paths, CDP browser, and MCP tools
   /eval [suite]    - Run empirical benchmarks (osworld, agent-diff, tool-attention, all)
   /train [mode]    - Compile or execute local LoRA/DPO adapter pass
+  /blocks          - List and inspect registered modular feature blocks
   /tools           - Display active MCP tools catalog
   /status          - Host OS window title and accessibility tree status
   /speak <text>    - Synthesize local speech offline
@@ -131,6 +135,13 @@ Available Slash Commands:
                 res = self.self_trainer.train_local_adapter(config=cfg)
                 print(f"\n[+] Fine-Tuning Completed [{res.mode}]: Loss {res.initial_loss:.4f} -> {res.final_loss:.4f}")
                 print(f"    Adapter: {res.output_adapter_dir}\n")
+            elif cmd_lower == "/blocks":
+                blocks = self.block_manager.list_blocks()
+                print(f"\n[+] Registered Feature Blocks ({len(blocks)} active):")
+                for b in blocks:
+                    st = "[ACTIVE]" if b.is_enabled else "[DISABLED]"
+                    print(f"  * {b.block_id:<32} [{b.block_type.value:<10}] {st}")
+                print()
             elif cmd_lower == "/tools":
                 tools = self.mcp_server.get_supported_tools()
                 print(f"\n[+] MCP Tools Catalog ({len(tools)} tools):")

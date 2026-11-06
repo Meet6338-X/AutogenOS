@@ -34,6 +34,7 @@ from autogenos.self_improvement.self_trainer import SelfTrainingEngine, LoRATrai
 from autogenos.core.system_doctor import SystemDoctor
 from autogenos.eval.benchmark_harness import BenchmarkHarness
 from autogenos.notifications.dispatcher import NotificationDispatcher
+from autogenos.blocks import BlockManager, BlockType
 
 logger = logging.getLogger("autogenos.api")
 
@@ -68,6 +69,7 @@ self_trainer = SelfTrainingEngine()
 doctor = SystemDoctor()
 benchmark_harness = BenchmarkHarness()
 notifier = NotificationDispatcher()
+block_manager = BlockManager()
 
 
 # Request / Response Schemas
@@ -110,6 +112,18 @@ class EvalRunRequest(BaseModel):
 
 
 
+
+
+
+class BlockRegisterRequest(BaseModel):
+    code: str
+    block_id: Optional[str] = None
+    block_type: str = "TOOL"
+
+
+class BlockExecuteRequest(BaseModel):
+    args: List[Any] = Field(default_factory=list)
+    kwargs: Dict[str, Any] = Field(default_factory=dict)
 
 class NotificationRequest(BaseModel):
     title: str = "AutogenOS Swarm Alert"
@@ -454,6 +468,84 @@ def send_notification(req: NotificationRequest):
         "status": "DISPATCHED",
         "results": res
     }
+
+
+
+
+@app.get("/api/v1/blocks")
+def get_blocks_catalog(block_type: Optional[str] = None, enabled_only: bool = False):
+    """Returns list of all registered modular blocks in the runtime."""
+    b_type = BlockType(block_type.upper()) if block_type else None
+    blocks = block_manager.list_blocks(block_type=b_type, enabled_only=enabled_only)
+    return {
+        "total_blocks": len(blocks),
+        "blocks": [b.to_dict() for b in blocks]
+    }
+
+
+@app.get("/api/v1/blocks/{block_id:path}/info")
+def get_block_info(block_id: str):
+    """Returns detailed metadata and health for a specific block."""
+    block = block_manager.get_block(block_id)
+    if not block:
+        raise HTTPException(status_code=404, detail=f"Block '{block_id}' not found")
+    return block.to_dict()
+
+
+@app.post("/api/v1/blocks/register")
+def register_dynamic_block(req: BlockRegisterRequest):
+    """Dynamically compiles and registers a new component block into the runtime."""
+    try:
+        b_type = BlockType(req.block_type.upper())
+    except Exception:
+        b_type = BlockType.CUSTOM
+    try:
+        b = block_manager.add_block_from_code(req.code, block_id=req.block_id, block_type=b_type)
+        return {
+            "status": "REGISTERED",
+            "block": b.to_dict()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/v1/blocks/{block_id:path}/enable")
+def enable_block_endpoint(block_id: str):
+    """Enables an existing block."""
+    ok = block_manager.enable_block(block_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"Block '{block_id}' not found")
+    return {"status": "ENABLED", "block_id": block_id}
+
+
+@app.post("/api/v1/blocks/{block_id:path}/disable")
+def disable_block_endpoint(block_id: str):
+    """Disables an existing block."""
+    ok = block_manager.disable_block(block_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"Block '{block_id}' not found")
+    return {"status": "DISABLED", "block_id": block_id}
+
+
+@app.delete("/api/v1/blocks/{block_id:path}")
+def remove_block_endpoint(block_id: str):
+    """Removes/unregisters a block from the runtime."""
+    b = block_manager.remove_block(block_id)
+    if not b:
+        raise HTTPException(status_code=404, detail=f"Block '{block_id}' not found")
+    return {"status": "REMOVED", "block_id": block_id}
+
+
+@app.post("/api/v1/blocks/{block_id:path}/execute")
+async def execute_block_endpoint(block_id: str, req: BlockExecuteRequest):
+    """Executes a block with supplied positional and keyword arguments."""
+    try:
+        res = await block_manager.execute_block(block_id, *req.args, **req.kwargs)
+        return {"status": "SUCCESS", "block_id": block_id, "result": res}
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Block '{block_id}' not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.websocket("/api/v1/voice/stream")

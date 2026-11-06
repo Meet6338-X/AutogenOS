@@ -1,3 +1,13 @@
+from autogenos.blocks import (
+    BlockType,
+    BlockStatus,
+    BlockMetadata,
+    BaseBlock,
+    FunctionalBlock,
+    block,
+    BlockRegistry,
+    BlockManager,
+)
 from autogenos.notifications.dispatcher import (
     NotificationDispatcher,
     DesktopNotifier,
@@ -183,4 +193,13 @@ __all__ = [
     "NotificationMessage",
     "NotificationSeverity",
     "InteractiveCockpitREPL",
+    # Modular Block System
+    "BlockType",
+    "BlockStatus",
+    "BlockMetadata",
+    "BaseBlock",
+    "FunctionalBlock",
+    "block",
+    "BlockRegistry",
+    "BlockManager",
 ]
