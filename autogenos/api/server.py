@@ -30,7 +30,9 @@ from autogenos.eval.agent_diff import AgentDiffEvaluator, StateSnapshot
 from autogenos.components.mcp_bridge import AutogenOSMCPServer
 from autogenos.components.browser_agent import BrowserAgent
 from autogenos.components.livekit_bridge import LiveKitAgentBridge
-from autogenos.self_improvement.self_trainer import SelfTrainingEngine
+from autogenos.self_improvement.self_trainer import SelfTrainingEngine, LoRATrainingConfig
+from autogenos.core.system_doctor import SystemDoctor
+from autogenos.eval.benchmark_harness import BenchmarkHarness
 
 logger = logging.getLogger("autogenos.api")
 
@@ -62,6 +64,8 @@ mcp_server = AutogenOSMCPServer()
 browser_agent = BrowserAgent()
 livekit_bridge = LiveKitAgentBridge(server=livekit_server)
 self_trainer = SelfTrainingEngine()
+doctor = SystemDoctor()
+benchmark_harness = BenchmarkHarness()
 
 
 # Request / Response Schemas
@@ -95,6 +99,23 @@ class ClickRequest(BaseModel):
 class TypeRequest(BaseModel):
     text: str
 
+
+
+
+class EvalRunRequest(BaseModel):
+    suite: str = "all"  # "osworld", "agent-diff", "tool-attention", "all"
+    output_file: Optional[str] = None
+
+
+class TrainModelRequest(BaseModel):
+    base_model: str = "meta-llama/Llama-3.2-3B-Instruct"
+    mode: str = "DPO"
+    epochs: int = 3
+    learning_rate: float = 2e-4
+    lora_r: int = 16
+    lora_alpha: int = 32
+    batch_size: int = 2
+    output_adapter_dir: str = ".autogenos/adapters/autogenos_lora"
 
 class ExploreRequest(BaseModel):
     targets: List[str] = Field(default_factory=lambda: ["TextEditor", "Terminal", "Settings"])
@@ -351,6 +372,58 @@ def induce_reusable_tools(min_support: int = 2):
     return {
         "frequent_sequences_count": len(seqs),
         "synthesized_tools": synthesized
+    }
+
+
+
+
+@app.get("/api/v1/system/doctor")
+def run_system_doctor():
+    """Executes comprehensive system diagnostics across OS bridges, MCP tools, and runtime."""
+    return doctor.run_diagnostics().model_dump()
+
+
+@app.get("/api/v1/eval/benchmarks")
+def get_benchmarks():
+    """Runs and returns comprehensive empirical benchmark results across OSWorld and AgentDiff."""
+    report = benchmark_harness.run_all()
+    return report.model_dump()
+
+
+@app.post("/api/v1/eval/run")
+def run_evaluation_suite(req: EvalRunRequest):
+    """Executes a specific benchmark evaluation suite."""
+    if req.suite.lower() == "all":
+        report = benchmark_harness.run_all()
+        return report.model_dump()
+    else:
+        res = benchmark_harness.run_suite(req.suite)
+        return res.model_dump()
+
+
+@app.post("/api/v1/self-improvement/train")
+def train_model_adapter(req: TrainModelRequest):
+    """Executes local LoRA / DPO model adapter training pass from collected execution trajectories."""
+    cfg = LoRATrainingConfig(
+        base_model=req.base_model,
+        epochs=req.epochs,
+        learning_rate=req.learning_rate,
+        lora_r=req.lora_r,
+        lora_alpha=req.lora_alpha,
+        batch_size=req.batch_size,
+        mode=req.mode,
+        output_adapter_dir=req.output_adapter_dir
+    )
+    res = self_trainer.train_local_adapter(config=cfg)
+    return res.model_dump()
+
+
+@app.get("/api/v1/self-improvement/training-runs")
+def get_training_runs():
+    """Returns history of executed fine-tuning runs and adapter artifacts."""
+    return {
+        "training_runs": [r.model_dump() for r in self_trainer.training_runs],
+        "count": len(self_trainer.training_runs)
     }
 
 

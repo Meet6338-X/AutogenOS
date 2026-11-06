@@ -1,3 +1,5 @@
+# System Doctor
+from autogenos.core.system_doctor import SystemDoctor, SystemDoctorReport, DiagnosticItem
 """
 AutogenOS: Autonomous Multi-Agent Operating System Framework with Recursive Self-Improvement.
 
@@ -59,6 +61,9 @@ from autogenos.self_improvement.self_trainer import (
     DPOPreferencePair,
     SFTTrainingSample,
     ReflectionRule,
+    LoRATrainer,
+    LoRATrainingConfig,
+    LoRATrainingRunResult,
 )
 
 # Open-Source Bridges & Components
@@ -76,6 +81,7 @@ from autogenos.components.browser_automation import LocalBrowserManager
 # Evaluation & Gateway
 from autogenos.eval.agent_diff import AgentDiffEvaluator
 from autogenos.eval.osworld_runner import OSWorldEvaluationRunner
+from autogenos.eval.benchmark_harness import BenchmarkHarness, BenchmarkSuiteResult, MasterBenchmarkReport
 from autogenos.gateway.bifrost_client import BifrostGatewayClient, DualLayerSemanticCache
 
 __version__ = "0.1.0"
@@ -151,4 +157,15 @@ __all__ = [
     "OSWorldEvaluationRunner",
     "BifrostGatewayClient",
     "DualLayerSemanticCache",
+    # System Doctor & Evaluation
+    "SystemDoctor",
+    "SystemDoctorReport",
+    "DiagnosticItem",
+    "BenchmarkHarness",
+    "BenchmarkSuiteResult",
+    "MasterBenchmarkReport",
+    # LoRA Fine-Tuning
+    "LoRATrainer",
+    "LoRATrainingConfig",
+    "LoRATrainingRunResult",
 ]
