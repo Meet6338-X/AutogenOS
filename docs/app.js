@@ -74,6 +74,19 @@ function initSwarmCockpit() {
         { prefix: "[0.28s]", text: "DPO Pair Synthesized: (Prompt: Excel Ribbon, Chosen: Win32 UIA, Rejected: Legacy Coordinate).", success: true },
         { prefix: "[0.32s]", text: "SelfTrainingEngine: Trajectory committed to .autogenos/trajectories/. Dataset ready.", success: true }
       ]
+    },
+    doctor_eval: {
+      activeNodes: [0, 1, 3],
+      logLines: [
+        { prefix: "[0.00s]", text: "CLI Command: 'autogenos doctor && autogenos eval --suite all'", highlight: true },
+        { prefix: "[0.02s]", text: "SystemDoctor -> Probing OS bridges, accessibility trees, and MCP tools..." },
+        { prefix: "[0.05s]", text: "Runtime: Python 3.12 [OK] | Git core.longpaths [OK] | CDP Browser [OK] | 7 MCP Tools [OK]" },
+        { prefix: "[0.07s]", text: "System Doctor Verdict: Overall Health = HEALTHY (10/10)", success: true },
+        { prefix: "[0.12s]", text: "BenchmarkHarness -> Executing OSWorld, Agent-Diff, and Tool Attention suites..." },
+        { prefix: "[0.18s]", text: "OSWorld Desktop Composite: 100.0% [PASS] | Agent-Diff State Invariants: 100.0% [PASS]" },
+        { prefix: "[0.22s]", text: "Tool Attention Compression: 72.2% Token Reduction [PASS]" },
+        { prefix: "[0.26s]", text: "Composite Benchmark Verdict: 3/3 Suites Passed (90.7% Overall Accuracy)", success: true }
+      ]
     }
   };
 

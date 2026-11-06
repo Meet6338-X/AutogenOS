@@ -1,3 +1,11 @@
+from autogenos.notifications.dispatcher import (
+    NotificationDispatcher,
+    DesktopNotifier,
+    WebhookNotifier,
+    NotificationMessage,
+    NotificationSeverity,
+)
+from autogenos.cli.repl import InteractiveCockpitREPL
 # System Doctor
 from autogenos.core.system_doctor import SystemDoctor, SystemDoctorReport, DiagnosticItem
 """
@@ -168,4 +176,11 @@ __all__ = [
     "LoRATrainer",
     "LoRATrainingConfig",
     "LoRATrainingRunResult",
+    # Notifications & REPL
+    "NotificationDispatcher",
+    "DesktopNotifier",
+    "WebhookNotifier",
+    "NotificationMessage",
+    "NotificationSeverity",
+    "InteractiveCockpitREPL",
 ]
