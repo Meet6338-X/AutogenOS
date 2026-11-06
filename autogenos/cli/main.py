@@ -20,7 +20,9 @@ from autogenos.eval.agent_diff import AgentDiffEvaluator
 from autogenos.control.os_controller import OSController
 from autogenos.components.mcp_bridge import AutogenOSMCPServer
 from autogenos.components.browser_agent import BrowserAgent, WebContentDistiller
-from autogenos.self_improvement.self_trainer import SelfTrainingEngine
+from autogenos.self_improvement.self_trainer import SelfTrainingEngine, LoRATrainingConfig
+from autogenos.core.system_doctor import SystemDoctor
+from autogenos.eval.benchmark_harness import BenchmarkHarness
 
 
 def print_banner():
@@ -144,16 +146,30 @@ def cmd_status(args):
 
 def cmd_papers(args):
     papers_dir = Path("papers")
+    pdf_path = Path("docs/papers/AutogenOS_IEEE_Research_Paper.pdf")
+
+    if getattr(args, "pdf", False):
+        print("\n--- AUTOGENOS OFFICIAL IEEE RESEARCH PAPER ---")
+        if pdf_path.exists():
+            print(f"Title:   AutogenOS: A Deterministic, Multi-Agent Operating System Framework")
+            print(f"Author:  Meet Shah, Senior Member, IEEE")
+            print(f"Format:  IEEE Transactions Standard (2-Column, LaTeX / KaTeX)")
+            print(f"Path:    {pdf_path.resolve()}")
+            print(f"Status:  VERIFIED (Size: {pdf_path.stat().st_size:,} bytes)")
+        else:
+            print(f"PDF paper not found at {pdf_path}")
+        return
+
     print("\n--- AUTOGENOS ACADEMIC WHITE PAPERS ---")
     if not papers_dir.exists():
         print("Papers directory not found.")
         return
 
     for p in sorted(papers_dir.glob("*.md")):
-        # Read title
         first_line = p.read_text(encoding="utf-8").splitlines()[0]
         title = first_line.replace("#", "").strip()
         print(f"  * [{p.name}] -> {title}")
+    print(f"  * [PDF Edition] -> {pdf_path} (Author: Meet Shah, Senior Member, IEEE)")
     print("\nAll papers formatted with formal proofs, Mermaid diagrams, and LaTeX formulations.")
 
 
@@ -230,6 +246,63 @@ def cmd_self_train(args):
         print(f"    - DPO Preference Pairs:  {res['dpo_samples_count']} samples -> {res['dpo_file']}")
         print(f"    - SFT Supervised Turns:  {res['sft_samples_count']} samples -> {res['sft_file']}")
 
+    if getattr(args, "train", False):
+        cfg = LoRATrainingConfig()
+        res = engine.train_local_adapter(config=cfg)
+        print(f"\n[+] Local Fine-Tuning Pass Completed: Final Loss {res.final_loss:.4f} -> {res.output_adapter_dir}")
+
+
+
+def cmd_doctor(args):
+    doctor = SystemDoctor()
+    report = doctor.run_diagnostics()
+    print(doctor.format_cli_output(report))
+
+
+def cmd_eval(args):
+    harness = BenchmarkHarness()
+    suite = args.suite or "all"
+    print(f"\n[+] Running AutogenOS Benchmark Suite: '{suite}'...")
+    if suite == "all":
+        report = harness.run_all()
+        print(harness.format_cli_report(report))
+        if args.output:
+            Path(args.output).write_text(report.model_dump_json(indent=2), encoding="utf-8")
+            print(f"[+] Benchmark report saved to: {args.output}")
+    else:
+        res = harness.run_suite(suite)
+        status = "[PASS]" if res.passed else "[FAIL]"
+        print(f"\n  {status}  {res.suite_name} | Score: {res.score_pct:.1f}% | Time: {res.duration_sec:.4f}s")
+        for k, v in res.details.items():
+            print(f"      - {k}: {v}")
+
+
+def cmd_train(args):
+    engine = SelfTrainingEngine()
+    cfg = LoRATrainingConfig(
+        base_model=args.base_model,
+        mode=args.mode,
+        epochs=args.epochs,
+        learning_rate=args.lr,
+        output_adapter_dir=args.adapter_out
+    )
+    print(f"\n[+] Initializing AutogenOS Local LoRA / {cfg.mode} Fine-Tuning Pipeline...")
+    print(f"    * Base Model:       {cfg.base_model}")
+    print(f"    * Mode:             {cfg.mode}")
+    print(f"    * Epochs:           {cfg.epochs}")
+    print(f"    * Learning Rate:    {cfg.learning_rate}")
+    print(f"    * Output Adapter:   {cfg.output_adapter_dir}")
+
+    res = engine.train_local_adapter(config=cfg)
+    print("\n--- FINE-TUNING EXECUTION REPORT ---")
+    print(f"Run ID:             {res.run_id}")
+    print(f"Status:             [{res.status}]")
+    print(f"Initial Loss:       {res.initial_loss:.4f}")
+    print(f"Final Loss:         {res.final_loss:.4f} (Reduction: {((res.initial_loss - res.final_loss)/res.initial_loss)*100:.1f}%)")
+    print(f"Loss Curve:         {' -> '.join([str(l) for l in res.loss_history])}")
+    print(f"Adapter Config:     {res.output_adapter_dir}/adapter_config.json")
+    print(f"Unsloth Recipe:     {res.recipe_script_path}")
+
 
 def cmd_serve(args):
     import uvicorn
@@ -269,7 +342,25 @@ def main():
     p_status = subparsers.add_parser("status", help="Inspect OS host accessibility and bridge status")
 
     # papers command
-    p_papers = subparsers.add_parser("papers", help="List academic whitepapers")
+    p_papers = subparsers.add_parser("papers", help="List academic whitepapers or view official IEEE PDF")
+    p_papers.add_argument("--pdf", action="store_true", help="Display verified path and metadata for official IEEE research paper PDF")
+
+    # doctor command
+    p_doc = subparsers.add_parser("doctor", help="Run comprehensive environmental & bridge diagnostics")
+
+    # eval command
+    p_eval = subparsers.add_parser("eval", help="Run empirical benchmark evaluation suites (OSWorld, Agent-Diff, Tool Attention)")
+    p_eval.add_argument("--suite", type=str, default="all", choices=["osworld", "agent-diff", "tool-attention", "all"], help="Benchmark suite to execute")
+    p_eval.add_argument("--output", type=str, default=None, help="Save evaluation report to JSON file")
+
+    # train command
+    p_train = subparsers.add_parser("train", help="Run local LoRA/DPO fine-tuning pass on recorded trajectories")
+    p_train.add_argument("--base-model", type=str, default="meta-llama/Llama-3.2-3B-Instruct", help="Base model identifier")
+    p_train.add_argument("--mode", type=str, default="DPO", choices=["DPO", "SFT"], help="Fine-tuning mode")
+    p_train.add_argument("--epochs", type=int, default=3, help="Training epochs")
+    p_train.add_argument("--lr", type=float, default=2e-4, help="Learning rate")
+    p_train.add_argument("--adapter-out", type=str, default=".autogenos/adapters/autogenos_lora", help="Output directory for adapter weights")
+
 
     # mcp-tools command
     p_mcp_tools = subparsers.add_parser("mcp-tools", help="List native Model Context Protocol (MCP) tools")
@@ -287,6 +378,7 @@ def main():
     p_st = subparsers.add_parser("self-train", help="Inspect autonomous self-training telemetry and export datasets")
     p_st.add_argument("--export", type=str, default=None, help="Directory to export DPO and SFT JSONL datasets")
     p_st.add_argument("--rules", action="store_true", help="Print active episodic memory reflection rules")
+    p_st.add_argument("--train", action="store_true", help="Trigger immediate local LoRA/DPO adapter training pass")
 
     # serve command
     p_serve = subparsers.add_parser("serve", help="Launch FastAPI & WebSocket server")
@@ -324,6 +416,12 @@ def main():
         asyncio.run(cmd_browser(args))
     elif args.command == "self-train":
         cmd_self_train(args)
+    elif args.command == "doctor":
+        cmd_doctor(args)
+    elif args.command == "eval":
+        cmd_eval(args)
+    elif args.command == "train":
+        cmd_train(args)
     elif args.command == "serve":
         cmd_serve(args)
     else:

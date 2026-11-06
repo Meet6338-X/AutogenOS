@@ -1,6 +1,6 @@
 """
 Unit tests for the AutogenOS Unified CLI Suite.
-Verifies all subcommands: mcp-tools, mcp-call, self-train, browser, status, papers, tool-attention.
+Verifies all subcommands: mcp-tools, mcp-call, self-train, browser, status, papers, tool-attention, doctor, eval, train.
 """
 
 import sys
@@ -64,3 +64,37 @@ def test_cli_papers(capsys):
         main()
     captured = capsys.readouterr()
     assert "AUTOGENOS ACADEMIC WHITE PAPERS" in captured.out
+
+
+def test_cli_papers_pdf(capsys):
+    with patch.object(sys, "argv", ["autogenos", "papers", "--pdf"]):
+        main()
+    captured = capsys.readouterr()
+    assert "AUTOGENOS OFFICIAL IEEE RESEARCH PAPER" in captured.out
+    assert "Meet Shah, Senior Member, IEEE" in captured.out
+    assert "VERIFIED" in captured.out
+
+
+def test_cli_doctor(capsys):
+    with patch.object(sys, "argv", ["autogenos", "doctor"]):
+        main()
+    captured = capsys.readouterr()
+    assert "AUTOGENOS SYSTEM DOCTOR DIAGNOSTIC REPORT" in captured.out
+    assert "Overall Health" in captured.out
+
+
+def test_cli_eval(capsys):
+    with patch.object(sys, "argv", ["autogenos", "eval"]):
+        main()
+    captured = capsys.readouterr()
+    assert "AUTOGENOS EMPIRICAL BENCHMARK EVALUATION REPORT" in captured.out
+    assert "Final Benchmark Verdict" in captured.out
+
+
+def test_cli_train(capsys, tmp_path):
+    out_dir = str(tmp_path / "cli_train_adapter")
+    with patch.object(sys, "argv", ["autogenos", "train", "--epochs", "2", "--adapter-out", out_dir]):
+        main()
+    captured = capsys.readouterr()
+    assert "FINE-TUNING EXECUTION REPORT" in captured.out
+    assert "[COMPLETED]" in captured.out
