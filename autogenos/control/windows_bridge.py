@@ -27,11 +27,25 @@ class WindowsOSController(BaseOSController):
         self.is_windows = sys.platform.startswith("win")
         if not self.is_windows:
             logger.warning("WindowsOSController instantiated on non-Windows host.")
+        else:
+            self._ensure_desktop()
+
+    def _ensure_desktop(self) -> None:
+        if not self.is_windows:
+            return
+        try:
+            user32 = ctypes.windll.user32
+            h_desk = user32.OpenDesktopW("Default", 0, False, 0x01FF)
+            if h_desk:
+                user32.SetThreadDesktop(h_desk)
+        except Exception as e:
+            logger.debug(f"Could not attach to Default desktop: {e}")
 
     def get_active_window(self) -> Dict[str, Any]:
         if not self.is_windows:
             return {"handle": 0, "title": "Mock Windows Host"}
 
+        self._ensure_desktop()
         user32 = ctypes.windll.user32
         hwnd = user32.GetForegroundWindow()
         length = user32.GetWindowTextLengthW(hwnd)
@@ -51,6 +65,7 @@ class WindowsOSController(BaseOSController):
         if not self.is_windows:
             return []
 
+        self._ensure_desktop()
         user32 = ctypes.windll.user32
         results = []
 
@@ -71,8 +86,12 @@ class WindowsOSController(BaseOSController):
                         })
             return True
 
-        WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_int, ctypes.c_int)
-        user32.EnumWindows(WNDENUMPROC(enum_handler), 0)
+        WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.wintypes.BOOL, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM)
+        h_desk = user32.OpenDesktopW("Default", 0, False, 0x01FF)
+        if h_desk:
+            user32.EnumDesktopWindows(h_desk, WNDENUMPROC(enum_handler), 0)
+        else:
+            user32.EnumWindows(WNDENUMPROC(enum_handler), 0)
         return results
 
     def focus_window(self, title_query: str) -> bool:
