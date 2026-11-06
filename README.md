@@ -18,7 +18,7 @@
 <p align="center">
   <a href="https://github.com/Meet6338-X/AutogenOS/actions/workflows/deploy-pages.yml"><img src="https://github.com/Meet6338-X/AutogenOS/actions/workflows/deploy-pages.yml/badge.svg" alt="Deploy GitHub Pages"/></a>
   <a href="https://github.com/Meet6338-X/AutogenOS/actions/workflows/ci.yml"><img src="https://github.com/Meet6338-X/AutogenOS/actions/workflows/ci.yml/badge.svg" alt="CI & Tests"/></a>
-  <a href="https://github.com/Meet6338-X/AutogenOS/actions"><img src="https://img.shields.io/badge/tests-40%20passed%20%7C%20100%25-brightgreen.svg?style=flat&logo=pytest&logoColor=white" alt="Tests"/></a>
+  <a href="https://github.com/Meet6338-X/AutogenOS/actions"><img src="https://img.shields.io/badge/tests-73%20passed%20%7C%20100%25-brightgreen.svg?style=flat&logo=pytest&logoColor=white" alt="Tests"/></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB.svg?style=flat&logo=python&logoColor=white" alt="Python 3.11+"/></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg?style=flat" alt="Platforms"/>
   <img src="https://img.shields.io/badge/voice-LiveKit%20%3C500ms-FF4F00.svg?style=flat&logo=webrtc&logoColor=white" alt="Voice Latency"/>
@@ -209,6 +209,10 @@ autogenos --help
 | :--- | :--- | :--- |
 | **`run`** | `autogenos run "<intent>"` | Dispatch natural language intent to the swarm orchestrator with causal verification. |
 | **`tool-attention`** | `autogenos tool-attention "<intent>" [--top-k N]` | Inspect dynamic tool gating and compute exact MCP context token tax savings. |
+| **`mcp-tools`** | `autogenos mcp-tools` | List all native Model Context Protocol (MCP) tools conforming to JSON-RPC 2.0. |
+| **`mcp-call`** | `autogenos mcp-call <tool> [--args <json>]` | Dispatch an MCP tool call directly from the terminal. |
+| **`browser`** | `autogenos browser <url>` | Scrape web page and distill DOM into token-efficient Markdown with interactive element indexing. |
+| **`self-train`** | `autogenos self-train [--export <dir>] [--rules]` | Inspect autonomous self-training telemetry, reflection rules, and export DPO/SFT datasets. |
 | **`voice`** | `autogenos voice` | Launch continuous sub-500ms WebRTC voice pipeline simulation with VAD & turn detection. |
 | **`speak`** | `autogenos speak "<text>"` | 100% free, zero-latency local speech synthesis via offline TTS engines. |
 | **`livekit-local`** | `autogenos livekit-local` | Start and verify the embedded local LiveKit room server (100% free). |
@@ -248,13 +252,23 @@ autogenos serve --host 127.0.0.1 --port 8000
 
 ### Key API Endpoints
 
-- `POST /api/v1/intent/dispatch`: Dispatch natural language objectives to the swarm.
-- `POST /api/v1/tools/gate`: Evaluate Tool Attention gating and calculate token savings.
-- `POST /api/v1/voice/speak`: Synthesize zero-latency local speech via offline TTS.
-- `GET  /api/v1/system/status`: Host OS diagnostics, active window handle, and memory.
-- `POST /api/v1/self-improvement/explore`: Trigger RSIAgent autonomous boundary exploration.
-- `WS   /ws/voice/stream`: Bidirectional continuous streaming WebRTC voice channel.
-- `WS   /ws/swarm/events`: Real-time streaming swarm lifecycle and evidence telemetry.
+| Protocol | Endpoint | Description |
+| :---: | :--- | :--- |
+| **REST** | `POST /api/v1/orchestrator/run` | Execute long-horizon user intent via Planner-Actor-Verifier closed loop. |
+| **REST** | `POST /api/v1/tool-attention/gate` | Semantic cosine tool gating & MCP token tax savings calculator. |
+| **MCP** | `GET  /api/v1/mcp/tools` | Complete Model Context Protocol (MCP) tool catalog. |
+| **MCP** | `POST /api/v1/mcp/call` | Invoke native AutogenOS tools using standard MCP argument schema. |
+| **MCP** | `POST /api/v1/mcp/jsonrpc` | Standard JSON-RPC 2.0 protocol endpoint for Claude Desktop, Cursor, and external agents. |
+| **REST** | `POST /api/v1/browser/extract-markdown` | Browser-Use DOM distillation (88% token reduction) and interactive UI targets indexing. |
+| **REST** | `POST /api/v1/livekit/token` | 100% free local LiveKit WebRTC HMAC-SHA256 JWT credential generator. |
+| **REST** | `GET  /api/v1/self-improvement/metrics` | Real-time autonomous learning telemetry, trajectory counts, and success rates. |
+| **REST** | `POST /api/v1/self-improvement/export-dataset` | Export causally grounded DPO preference pairs and SFT datasets to JSONL. |
+| **REST** | `GET  /api/v1/self-improvement/rules` | Query episodic memory reflection heuristics and failure-prevention rules. |
+| **REST** | `POST /api/v1/self-improvement/induce-tools` | Autonomously mine frequent execution sequences into new reusable MCP tools. |
+| **REST** | `POST /api/v1/voice/speak` | Synthesize zero-latency local speech via offline Windows SAPI5 / offline TTS. |
+| **REST** | `GET  /api/v1/os/windows` | List all visible host desktop application windows with handles and bounds. |
+| **WS** | `WS   /api/v1/voice/stream` | Sub-500ms continuous streaming WebRTC voice WebSocket with Silero VAD. |
+| **WS** | `WS   /api/v1/swarm/telemetry` | Real-time event feed for live execution dashboards and telemetry.
 
 ```bash
 # Example: Gating tools via REST API

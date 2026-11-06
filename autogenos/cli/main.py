@@ -8,6 +8,7 @@ import sys
 import asyncio
 import argparse
 from pathlib import Path
+import json
 from autogenos.core.orchestrator import SwarmOrchestrator
 from autogenos.tool_attention.engine import ToolAttentionEngine
 from autogenos.swarm.graph import SwarmGraphController
@@ -17,6 +18,9 @@ from autogenos.components.livekit_local import LocalLiveKitServer
 from autogenos.self_improvement.rsi_agent import RSIAgentEngine
 from autogenos.eval.agent_diff import AgentDiffEvaluator
 from autogenos.control.os_controller import OSController
+from autogenos.components.mcp_bridge import AutogenOSMCPServer
+from autogenos.components.browser_agent import BrowserAgent, WebContentDistiller
+from autogenos.self_improvement.self_trainer import SelfTrainingEngine
 
 
 def print_banner():
@@ -153,6 +157,80 @@ def cmd_papers(args):
     print("\nAll papers formatted with formal proofs, Mermaid diagrams, and LaTeX formulations.")
 
 
+def cmd_mcp_tools(args):
+    server = AutogenOSMCPServer()
+    tools = server.get_supported_tools()
+    print(f"\n[+] AutogenOS Model Context Protocol (MCP) Tools Catalog ({len(tools)} tools):\n")
+    for t in tools:
+        print(f"  * {t['name']:<26} | {t['description']}")
+    print("\nAll tools conform strictly to the Model Context Protocol JSON-RPC 2.0 specification.")
+
+
+def cmd_mcp_call(args):
+    server = AutogenOSMCPServer()
+    tool_name = args.tool
+    tool_args = {}
+    if args.args:
+        try:
+            tool_args = json.loads(args.args)
+        except Exception as e:
+            print(f"[!] Error parsing arguments JSON: {e}")
+            return
+
+    print(f"\n[+] Invoking MCP Tool: '{tool_name}' with arguments: {tool_args}")
+    res = server.handle_tools_call(tool_name, tool_args)
+    status = "SUCCESS" if not res.get("isError") else "ERROR"
+    print(f"    Status: [{status}]")
+    for c in res.get("content", []):
+        print(f"    Content ({c.get('type')}):")
+        print(f"{c.get('text')}")
+
+
+async def cmd_browser(args):
+    url = args.url
+    print(f"\n[+] Navigating and distilling web content for: {url}")
+    import httpx
+    try:
+        resp = httpx.get(url, timeout=12.0, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0"})
+        md = WebContentDistiller.html_to_markdown(resp.text)
+        interactive = WebContentDistiller.extract_interactive_elements(resp.text)
+        print(f"    Status Code: {resp.status_code}")
+        print(f"    Interactive Targets Identified: {len(interactive)}")
+        print("\n--- DISTILLED MARKDOWN PREVIEW (First 600 chars) ---")
+        print(md[:600] + ("..." if len(md) > 600 else ""))
+        print("\n--- TOP INTERACTIVE TARGETS ---")
+        for elem in interactive[:8]:
+            print(f"  [{elem.index}] {elem.role.upper():<7}: {elem.text:<35} | Selector: {elem.selector}")
+    except Exception as e:
+        print(f"[!] Browser extraction failed: {e}")
+
+
+def cmd_self_train(args):
+    engine = SelfTrainingEngine()
+    metrics = engine.get_self_training_metrics()
+
+    print("\n--- AUTOGENOS AUTONOMOUS SELF-TRAINING REPORT ---")
+    print(f"Trajectories Recorded:       {metrics['total_trajectories_recorded']}")
+    print(f"Successful Trajectories:     {metrics['successful_trajectories']}")
+    print(f"Failed Trajectories:         {metrics['failed_trajectories']}")
+    print(f"Execution Success Rate:      {metrics['success_rate_pct']:.1f}%")
+    print(f"Episodic Reflection Rules:   {metrics['episodic_reflection_rules_count']} active heuristics")
+    print(f"Mined Composite Patterns:    {metrics['mined_composite_patterns_count']}")
+    print(f"Learning Feedback Mode:      {metrics['learning_mode']}")
+
+    if args.rules:
+        rules = list(engine.reflector.rules.values())
+        print(f"\n[+] Active Episodic Memory Rules ({len(rules)}):")
+        for r in rules:
+            print(f"  * [{r.target_domain.upper()}] Avoid '{r.failing_pattern}': {r.recommended_policy} (Occurrences: {r.occurrences})")
+
+    if args.export:
+        res = engine.export_training_datasets(export_dir=args.export)
+        print(f"\n[+] Exported Datasets to '{args.export}':")
+        print(f"    - DPO Preference Pairs:  {res['dpo_samples_count']} samples -> {res['dpo_file']}")
+        print(f"    - SFT Supervised Turns:  {res['sft_samples_count']} samples -> {res['sft_file']}")
+
+
 def cmd_serve(args):
     import uvicorn
     print(f"\n[+] Launching AutogenOS FastAPI & WebSocket Server on http://{args.host}:{args.port}")
@@ -193,6 +271,23 @@ def main():
     # papers command
     p_papers = subparsers.add_parser("papers", help="List academic whitepapers")
 
+    # mcp-tools command
+    p_mcp_tools = subparsers.add_parser("mcp-tools", help="List native Model Context Protocol (MCP) tools")
+
+    # mcp-call command
+    p_mcp_call = subparsers.add_parser("mcp-call", help="Dispatch tool call via MCP protocol")
+    p_mcp_call.add_argument("tool", type=str, help="Tool name to execute")
+    p_mcp_call.add_argument("--args", type=str, default="{}", help="Tool arguments as JSON string")
+
+    # browser command
+    p_browser = subparsers.add_parser("browser", help="Scrape web page and distill DOM into token-efficient Markdown")
+    p_browser.add_argument("url", type=str, help="Target URL to inspect")
+
+    # self-train command
+    p_st = subparsers.add_parser("self-train", help="Inspect autonomous self-training telemetry and export datasets")
+    p_st.add_argument("--export", type=str, default=None, help="Directory to export DPO and SFT JSONL datasets")
+    p_st.add_argument("--rules", action="store_true", help="Print active episodic memory reflection rules")
+
     # serve command
     p_serve = subparsers.add_parser("serve", help="Launch FastAPI & WebSocket server")
     p_serve.add_argument("--host", type=str, default="127.0.0.1", help="Host address")
@@ -221,6 +316,14 @@ def main():
         cmd_status(args)
     elif args.command == "papers":
         cmd_papers(args)
+    elif args.command == "mcp-tools":
+        cmd_mcp_tools(args)
+    elif args.command == "mcp-call":
+        cmd_mcp_call(args)
+    elif args.command == "browser":
+        asyncio.run(cmd_browser(args))
+    elif args.command == "self-train":
+        cmd_self_train(args)
     elif args.command == "serve":
         cmd_serve(args)
     else:
