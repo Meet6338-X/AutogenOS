@@ -61,6 +61,19 @@ function initSwarmCockpit() {
         { prefix: "[0.35s]", text: "Planner synthesized fallback dependency installation policy." },
         { prefix: "[0.48s]", text: "Retry executed -> Exit code 0 -> State COMMITTED successfully.", success: true }
       ]
+    },
+    self_training: {
+      activeNodes: [0, 1, 2, 3],
+      logLines: [
+        { prefix: "[0.00s]", text: "CurriculumAgent -> Dispatched exploration task: 'Discover & stress-test menu hierarchy in host Excel'", highlight: true },
+        { prefix: "[0.04s]", text: "ActorAlpha: Attempted click on legacy coordinate offset (100, 100)." },
+        { prefix: "[0.09s]", text: "VerifierNode: Environmental check REJECTED (Window unresponsive at coordinate).", error: true },
+        { prefix: "[0.12s]", text: "Reflexion Heuristics -> Formulated negative rule: 'Avoid hardcoded (100, 100); use Win32 HWND focus'." },
+        { prefix: "[0.18s]", text: "UI-Evol Retrace & Critique -> Re-aimed selector via Win32 UI Automation tree." },
+        { prefix: "[0.24s]", text: "Retry executed -> Accessibility tree matched -> Subtask COMPLETED.", success: true },
+        { prefix: "[0.28s]", text: "DPO Pair Synthesized: (Prompt: Excel Ribbon, Chosen: Win32 UIA, Rejected: Legacy Coordinate).", success: true },
+        { prefix: "[0.32s]", text: "SelfTrainingEngine: Trajectory committed to .autogenos/trajectories/. Dataset ready.", success: true }
+      ]
     }
   };
 
@@ -301,6 +314,56 @@ Content-Type: application/json
   "evidence_passed": 3,
   "tokens_pruned": 4050
 }`,
+
+    mcp: `# Standard Model Context Protocol (MCP) JSON-RPC 2.0 Request
+# POST /api/v1/mcp/jsonrpc
+{
+  "jsonrpc": "2.0",
+  "id": "agy-mcp-42",
+  "method": "tools/call",
+  "params": {
+    "name": "autogenos_exec_shell",
+    "arguments": {
+      "command": "python --version"
+    }
+  }
+}
+
+# Standard MCP JSON-RPC 2.0 Response:
+{
+  "jsonrpc": "2.0",
+  "id": "agy-mcp-42",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"exit_code\": 0,\n  \"stdout\": \"Python 3.12.6\\n\"\n}"
+      }
+    ],
+    "isError": false
+  }
+}`,
+
+    selftrain: `import autogenos as agy
+from autogenos.self_improvement.self_trainer import SelfTrainingEngine
+
+# 1. Initialize Autonomous Self-Training Coordinator
+engine = SelfTrainingEngine()
+
+# 2. Inspect real-time learning metrics & reflection bank
+metrics = engine.get_self_training_metrics()
+print("Trajectories:", metrics["total_trajectories_recorded"])
+print("Rules Active:", metrics["episodic_reflection_rules_count"])
+
+# 3. Export causally grounded DPO pairs for LoRA fine-tuning
+dataset_info = engine.export_training_datasets(export_dir=".autogenos/datasets")
+print("Exported DPO Pairs:", dataset_info["dpo_samples_count"])
+print("Exported SFT Turns:", dataset_info["sft_samples_count"])
+
+# 4. Mine frequent action sequences and induce new MCP tools
+seqs = engine.tool_inducer.identify_frequent_action_sequences(engine.collector.trajectories)
+tool = engine.tool_inducer.synthesize_tool_scaffold(seqs[0], "auto_audit_pipeline")
+print("Synthesized Tool:\n", tool["generated_code"])`,
 
     websocket: `// Connect to sub-500ms Real-Time Voice WebSocket
 const ws = new WebSocket("ws://127.0.0.1:8000/api/v1/voice/stream");

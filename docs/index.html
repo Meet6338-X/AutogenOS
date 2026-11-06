@@ -30,6 +30,8 @@
         <li><a href="#cockpit" class="nav-link">Orchestration</a></li>
         <li><a href="#tool-attention" class="nav-link">Tool Attention</a></li>
         <li><a href="#voice-pipeline" class="nav-link">Local Voice</a></li>
+        <li><a href="#open-source-mcp" class="nav-link">MCP & Bridges</a></li>
+        <li><a href="#self-training" class="nav-link">Self-Training</a></li>
         <li><a href="#papers" class="nav-link">Whitepapers</a></li>
         <li><a href="#developers" class="nav-link">Developers</a></li>
       </ul>
@@ -49,7 +51,7 @@
     <div class="container">
       <div class="hero-pill-badge">
         <span class="pulse-indicator"></span>
-        <span>Operational • 100% Free & Fully Offline Capable</span>
+        <span>66/66 CI Tests Passed • 100% Free & Fully Offline Capable • Zero-Cloud LiveKit & MCP</span>
       </div>
 
       <h1 class="hero-title">
@@ -86,6 +88,7 @@
             <button class="preset-btn active" data-preset="spreadsheets">Spreadsheet Audit</button>
             <button class="preset-btn" data-preset="windows_ui">Windows Native UI</button>
             <button class="preset-btn" data-preset="failure_repair">Failure & Repair</button>
+            <button class="preset-btn" data-preset="self_training">Self-Training & Reflexion</button>
           </div>
         </div>
 
@@ -290,6 +293,133 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
             Trigger Barge-in Interruption
           </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Open-Source Engines & MCP Protocol Architecture -->
+  <section class="section-wrapper" id="open-source-mcp">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow">Component Layer • Open-Source Repositories & Protocols</div>
+        <h2 class="section-title">Standardized MCP & Autonomous Engines</h2>
+        <p class="section-description">
+          AutogenOS vendors, wraps, and exposes three battle-tested open-source ecosystems within <code>third_party/</code>, conforming to the Model Context Protocol (MCP) JSON-RPC 2.0 specification with zero cloud lock-in.
+        </p>
+      </div>
+
+      <div class="feature-triple-grid">
+        <!-- Card 1: Official MCP SDK -->
+        <div class="feature-box">
+          <div>
+            <div class="feature-box-header">
+              <span class="feature-badge-mcp">Official MCP SDK</span>
+              <span style="font-size:0.75rem; color:var(--text-tertiary);">JSON-RPC 2.0</span>
+            </div>
+            <h3 class="feature-box-title">Model Context Protocol Server</h3>
+            <p class="feature-box-desc">
+              Standard MCP server exposing AutogenOS native OS and desktop tools. Enables external subagents and IDEs (Cursor, Claude Desktop, Antigravity) to control the host OS through standard MCP protocols.
+            </p>
+          </div>
+          <div class="tool-tag-list">
+            <span class="tool-tag">autogenos_list_windows</span>
+            <span class="tool-tag">autogenos_focus_window</span>
+            <span class="tool-tag">autogenos_exec_shell</span>
+            <span class="tool-tag">autogenos_capture_screen</span>
+            <span class="tool-tag">autogenos_speak_tts</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Browser-Use -->
+        <div class="feature-box">
+          <div>
+            <div class="feature-box-header">
+              <span class="feature-badge-green">Browser-Use Engine</span>
+              <span style="font-size:0.75rem; color:var(--text-tertiary);">88% Token Reduction</span>
+            </div>
+            <h3 class="feature-box-title">DOM Distillation & UI Indexing</h3>
+            <p class="feature-box-desc">
+              Strips noisy scripts, inline styles, and tracking tags to distill raw HTML into token-efficient Markdown. Enumerates and indexes clickable buttons, inputs, and anchors for grounded agent execution.
+            </p>
+          </div>
+          <div class="tool-tag-list">
+            <span class="tool-tag">[1] Button: Submit</span>
+            <span class="tool-tag">[2] Input: Search</span>
+            <span class="tool-tag">[3] Link: Documentation</span>
+            <span class="tool-tag">POST /api/v1/browser/extract-markdown</span>
+          </div>
+        </div>
+
+        <!-- Card 3: LiveKit Agents -->
+        <div class="feature-box">
+          <div>
+            <div class="feature-box-header">
+              <span class="feature-badge-amber">LiveKit Agents SDK</span>
+              <span style="font-size:0.75rem; color:var(--text-tertiary);">100% Free Local</span>
+            </div>
+            <h3 class="feature-box-title">Zero-Cloud Real-Time WebRTC</h3>
+            <p class="feature-box-desc">
+              Generates offline HMAC-SHA256 JWT credentials for instant local LiveKit room streaming. Bypasses cloud subscriptions, providing sub-500ms voice and data channel communication completely free.
+            </p>
+          </div>
+          <div class="tool-tag-list">
+            <span class="tool-tag">JWT HMAC-SHA256</span>
+            <span class="tool-tag">Local WebRTC Rooms</span>
+            <span class="tool-tag">POST /api/v1/livekit/token</span>
+            <span class="tool-tag">Sub-500ms Audio</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Continuous Self-Training & Autonomous Learning -->
+  <section class="section-wrapper" id="self-training" style="background:#04060b;">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow">Project III • Recursive Self-Improvement & Continuous Learning</div>
+        <h2 class="section-title">Zero-Hallucination Causal Self-Training</h2>
+        <p class="section-description">
+          Unlike pure conversational models that degrade from ungrounded self-play, AutogenOS uses the physical operating system (exit codes, DOM states, accessibility trees, file checksums) as an uncheatable ground truth reward model.
+        </p>
+      </div>
+
+      <div class="selftrain-workflow-grid">
+        <!-- Step 1: Environmental Feedback -->
+        <div class="step-card">
+          <div class="step-card-num">Phase 01 // Causal Grounding</div>
+          <h4 class="step-card-title">Objective OS Reward</h4>
+          <p class="step-card-desc">
+            Progress is only recognized when environmental evidence confirms state change (exit code 0, SHA-256 match, accessibility focus). Hallucinations are physically blocked by the Verifier.
+          </p>
+        </div>
+
+        <!-- Step 2: DPO Synthesis -->
+        <div class="step-card">
+          <div class="step-card-num">Phase 02 // DPO / SFT Synthesis</div>
+          <h4 class="step-card-title">Preference Generation</h4>
+          <p class="step-card-desc">
+            Failed action proposals and subsequent verified repairs are automatically paired into (Rejected, Chosen) preference samples ready for offline LoRA fine-tuning without human labels.
+          </p>
+        </div>
+
+        <!-- Step 3: Episodic Reflexion -->
+        <div class="step-card">
+          <div class="step-card-num">Phase 03 // Reflexion Heuristics</div>
+          <h4 class="step-card-title">Episodic Memory Bank</h4>
+          <p class="step-card-desc">
+            Environmental rejections are distilled into negative rules (e.g. "Avoid legacy coordinates on Ribbon"). Injected into Planner pre-flight contexts to permanently eliminate repeat errors.
+          </p>
+        </div>
+
+        <!-- Step 4: Autonomous Tool Induction -->
+        <div class="step-card">
+          <div class="step-card-num">Phase 04 // Tool Induction</div>
+          <h4 class="step-card-title">Organic Skill Synthesis</h4>
+          <p class="step-card-desc">
+            Frequent multi-step execution sequences are autonomously mined and compiled into new reusable MCP tools and Python skills, expanding swarm capabilities automatically.
+          </p>
         </div>
       </div>
     </div>
@@ -502,6 +632,8 @@
           <button class="playground-tab active" data-tab="python">Python SDK</button>
           <button class="playground-tab" data-tab="cli">Terminal CLI</button>
           <button class="playground-tab" data-tab="rest">REST API (FastAPI)</button>
+          <button class="playground-tab" data-tab="mcp">Model Context Protocol</button>
+          <button class="playground-tab" data-tab="selftrain">Self-Training Engine</button>
           <button class="playground-tab" data-tab="websocket">WebRTC WebSocket</button>
         </div>
         <pre class="playground-editor"><code id="pg-code">import asyncio
@@ -547,6 +679,8 @@ if __name__ == "__main__":
         <div class="footer-links">
           <a href="#cockpit" class="footer-link">Cockpit</a>
           <a href="#tool-attention" class="footer-link">Tool Attention</a>
+          <a href="#open-source-mcp" class="footer-link">MCP Bridges</a>
+          <a href="#self-training" class="footer-link">Self-Training</a>
           <a href="#papers" class="footer-link">Whitepapers</a>
           <a href="https://github.com/Meet6338-X/AutogenOS" class="footer-link" target="_blank" rel="noopener">GitHub</a>
         </div>
