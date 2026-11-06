@@ -43,7 +43,7 @@ class LocalBrowserManager:
                 return p
 
         # Check standard PATH
-        for binary in ["google-chrome", "chrome", "chromium", "msedge"]:
+        for binary in ["google-chrome", "chrome", "chromium", "msedge", "brave"]:
             found = shutil.which(binary)
             if found:
                 return found
@@ -82,13 +82,20 @@ class LocalBrowserManager:
             return False
 
     async def get_connected_cdp_client(self, timeout: float = 3.0) -> Optional[CDPBrowserClient]:
-        """Connects CDP client to the launched browser target."""
-        ws_url = f"ws://127.0.0.1:{self.port}/devtools/browser"
-        client = CDPBrowserClient(ws_url=ws_url)
-        connected = await client.connect(timeout=timeout)
-        if connected:
+        """Connects CDP client to the launched browser target, preferring active page session."""
+        # 1. Try connecting directly to active page target
+        client = await CDPBrowserClient.connect_to_active_page(port=self.port, timeout=timeout)
+        if client:
             self.cdp_client = client
             return client
+
+        # 2. Fallback to direct browser target
+        ws_url = f"ws://127.0.0.1:{self.port}/devtools/browser"
+        fallback = CDPBrowserClient(ws_url=ws_url)
+        connected = await fallback.connect(timeout=timeout)
+        if connected:
+            self.cdp_client = fallback
+            return fallback
         return None
 
     def stop_browser(self) -> None:

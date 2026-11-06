@@ -37,15 +37,32 @@ async def cmd_run(args):
     intent = args.intent
     print(f"\n[+] Dispatching intent to AutogenOS Swarm:\n    -> {intent}\n")
     
-    controller = SwarmGraphController()
+    def on_event(event_type: str, data: dict):
+        if event_type == "PLANNER_COMPLETED":
+            print(f"[Planner] Decomposed into {data.get('subtasks_count')} atomic subtasks:")
+            for i, st in enumerate(data.get('subtasks', [])):
+                print(f"  {i+1}. {st}")
+            print()
+        elif event_type == "ACTOR_PROPOSAL":
+            status = "PASSED" if data.get('evidence_passed') else "FAILED"
+            print(f"  -> [Actor] Executed tool '{data.get('tool')}' [{status}] for: '{data.get('intent')}'")
+            payload = str(data.get('raw_payload', '')).strip().splitlines()
+            if payload:
+                print(f"     Telemetry: {payload[0][:100]}")
+        elif event_type == "VERIFIER_COMMITTED":
+            print(f"  ✓  [Verifier] COMMITTED subtask: '{data.get('intent')}' (Tokens Pruned: {data.get('tokens_pruned')})\n")
+        elif event_type == "VERIFIER_REJECTED":
+            print(f"  ✗  [Verifier] REJECTED subtask: '{data.get('intent')}' -> Repairing...\n")
+
+    controller = SwarmGraphController(event_callback=on_event)
     state = await controller.run_full_lifecycle(intent)
     
-    print("\n" + "=" * 60)
-    print(f"Task Phase:      {state.phase.value}")
-    print(f"Subtasks Total:  {len(state.subtasks)}")
-    print(f"Evidence Passed: {len(state.accumulated_evidence)}")
-    print(f"Tokens Pruned:   {state.token_usage_pruned} tokens (via CarryOn)")
-    print("=" * 60)
+    print("\n" + "=" * 65)
+    print(f"  Task Final Phase:        {state.phase.value}")
+    print(f"  Subtasks Executed:       {len(state.subtasks)}")
+    print(f"  Causal Evidence Proofs:  {len(state.accumulated_evidence)}")
+    print(f"  Tokens Folded (CarryOn): {state.token_usage_pruned} tokens")
+    print("=" * 65)
 
 
 def cmd_tool_attention(args):

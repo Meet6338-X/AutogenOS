@@ -1,5 +1,6 @@
 """
 Central Orchestrator Node implementing the Planner-Actor-Verifier Lifecycle.
+Executes real operations against the system runtime and enforces deterministic causal grounding.
 """
 
 from __future__ import annotations
@@ -14,6 +15,8 @@ from autogenos.core.state import (
     EvidenceType,
 )
 from autogenos.core.prompt_protocol import OrchestratorProtocol
+from autogenos.swarm.planner import AutonomousIntentPlanner
+from autogenos.execution.action_dispatcher import ActionDispatcher
 
 logger = logging.getLogger("autogenos.orchestrator")
 
@@ -25,9 +28,16 @@ class SwarmOrchestrator:
     when deterministic environmental evidence is validated by the Verifier.
     """
 
-    def __init__(self, session_id: Optional[str] = None):
+    def __init__(
+        self,
+        session_id: Optional[str] = None,
+        planner: Optional[AutonomousIntentPlanner] = None,
+        dispatcher: Optional[ActionDispatcher] = None
+    ):
         self.session_id = session_id
         self.protocol = OrchestratorProtocol()
+        self.planner = planner or AutonomousIntentPlanner()
+        self.dispatcher = dispatcher or ActionDispatcher()
 
     async def initialize_state(self, master_intent: str) -> SwarmGlobalState:
         """Instantiate new thread-scoped global state."""
@@ -41,11 +51,7 @@ class SwarmOrchestrator:
         Decomposes high-level intent into atomic, causally dependent subtasks.
         """
         state.phase = TaskPhase.PLANNING
-        # Scaffolding atomic decomposition (can be augmented by LLM or rule engine)
-        decomposed = [
-            SubTask(intent=f"Decomposed step 1 for: {state.master_intent}"),
-            SubTask(intent=f"Verification checkpoint for: {state.master_intent}")
-        ]
+        decomposed = self.planner.plan(state.master_intent)
         state.subtasks = decomposed
         state.phase = TaskPhase.ACTING
         return decomposed
@@ -75,7 +81,7 @@ class SwarmOrchestrator:
         subtask.is_committed = True
         subtask.phase = TaskPhase.COMPLETED
         state.accumulated_evidence.append(evidence)
-        
+
         # Advance subtask index
         state.active_subtask_index += 1
         if state.active_subtask_index >= len(state.subtasks):
@@ -87,24 +93,23 @@ class SwarmOrchestrator:
         return True
 
     async def dispatch_intent(self, intent: str) -> Dict[str, Any]:
-        """Convenience method to execute single intent through the PAV pipeline."""
+        """Executes full intent through the real Planner-Actor-Verifier pipeline."""
         state = await self.initialize_state(intent)
         subtasks = await self.plan_subtasks(state)
-        
-        # Mock demonstration of PAV loop
-        current = state.current_subtask()
-        if current:
-            mock_evidence = DeterministicEvidence(
-                evidence_type=EvidenceType.SHELL_OUTPUT,
-                source_target="env_exec",
-                raw_payload="Exit code: 0, Output: OK",
-                passed=True
-            )
-            await self.verify_and_commit(state, current, mock_evidence)
+
+        for subtask in subtasks:
+            # Actor turn: real execution via ActionDispatcher
+            proposal, evidence = self.dispatcher.dispatch_subtask_action(subtask)
+            subtask.proposals.append(proposal)
+
+            # Verifier turn: causal commitment
+            await self.verify_and_commit(state, subtask, evidence)
 
         return {
             "session_id": state.session_id,
             "status": state.phase.value,
-            "subtasks_total": len(subtasks),
+            "subtasks_total": len(state.subtasks),
+            "subtasks_executed": len(state.subtasks),
             "evidence_count": len(state.accumulated_evidence),
+            "accumulated_evidence": [e.model_dump() for e in state.accumulated_evidence]
         }

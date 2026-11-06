@@ -27,6 +27,7 @@ class EvidenceType(str, Enum):
     ACCESSIBILITY_TREE = "ACCESSIBILITY_TREE"
     DB_STATE_DIFF = "DB_STATE_DIFF"
     PROCESS_TELEMETRY = "PROCESS_TELEMETRY"
+    DOM_STATE = "DOM_STATE"
 
 
 class DeterministicEvidence(BaseModel):
@@ -61,6 +62,7 @@ class SubTask(BaseModel):
     proposals: List[ActionProposal] = Field(default_factory=list)
     attached_evidence: List[DeterministicEvidence] = Field(default_factory=list)
     is_committed: bool = False
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class SwarmGlobalState(BaseModel):
@@ -72,11 +74,11 @@ class SwarmGlobalState(BaseModel):
     phase: TaskPhase = TaskPhase.PLANNING
     subtasks: List[SubTask] = Field(default_factory=list)
     active_subtask_index: int = 0
-    committed_state: Dict[str, Any] = Field(default_factory=dict)
     accumulated_evidence: List[DeterministicEvidence] = Field(default_factory=list)
-    step_count: int = 0
+    active_actor_worktrees: Dict[str, str] = Field(default_factory=dict)
     token_usage_pruned: int = 0
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    step_count: int = 0
+    failure_attribution_history: List[Dict[str, Any]] = Field(default_factory=list)
 
     def current_subtask(self) -> Optional[SubTask]:
         if 0 <= self.active_subtask_index < len(self.subtasks):
