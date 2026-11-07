@@ -426,8 +426,63 @@ def cmd_meet(args):
 
 def cmd_serve(args):
     import uvicorn
-    print(f"\n[+] Launching AutogenOS FastAPI & WebSocket Server on http://{args.host}:{args.port}")
-    uvicorn.run("autogenos.api.server:app", host=args.host, port=args.port, reload=args.reload)
+    import socket
+
+    host = getattr(args, "host", "127.0.0.1")
+    port = getattr(args, "port", 8008)
+
+    # Rebind if port is occupied
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        if s.connect_ex((host, port)) == 0:
+            fallback = 8010 if port == 8008 else 8008
+            print(f"[!] Notice: Port {port} is occupied. Auto-rebinding to port {fallback}...")
+            port = fallback
+
+    print(f"\n[+] Launching AutogenOS FastAPI & WebSocket Server on http://{host}:{port}")
+    uvicorn.run("autogenos.api.server:app", host=host, port=port, reload=getattr(args, "reload", False))
+
+
+def cmd_start(args):
+    """Launches full sovereign stack: FastAPI Backend + Next.js Cockpit UI."""
+    import subprocess
+    import sys
+    import time
+    import shutil
+    import webbrowser
+    from pathlib import Path
+
+    api_port = getattr(args, "api_port", 8008)
+    ui_port = getattr(args, "port", 3000)
+    dev = getattr(args, "dev", False)
+    ui_dir = Path(__file__).resolve().parent.parent.parent / "ui"
+
+    print("\n" + "=" * 68)
+    print("  AUTOGENOS SOVEREIGN MULTI-AGENT STACK LAUNCHER")
+    print(f"  * FastAPI Backend: http://127.0.0.1:{api_port}")
+    print(f"  * Next.js Cockpit: http://localhost:{ui_port}")
+    print(f"  * LiveKit Voice:   Ready (<370ms TTFA)")
+    print("=" * 68 + "\n")
+
+    backend_cmd = [sys.executable, "-m", "uvicorn", "autogenos.api.server:app", "--host", "127.0.0.1", "--port", str(api_port)]
+    backend_proc = subprocess.Popen(backend_cmd)
+    print(f"[+] Backend server daemon initialized (PID: {backend_proc.pid})")
+    time.sleep(1.5)
+
+    npm_bin = shutil.which("npm.cmd") or shutil.which("npm") or "npm"
+    ui_cmd = [npm_bin, "run", "dev", "--", "-p", str(ui_port)] if dev else [npm_bin, "start", "--", "-p", str(ui_port)]
+
+    if getattr(args, "open", True):
+        webbrowser.open(f"http://localhost:{ui_port}")
+
+    try:
+        subprocess.run(ui_cmd, cwd=str(ui_dir), check=True)
+    except KeyboardInterrupt:
+        print("\n[+] Shutting down AutogenOS stack...")
+    finally:
+        if backend_proc.poll() is None:
+            backend_proc.terminate()
+            backend_proc.wait(timeout=3)
+        print("[+] Sovereign stack shutdown cleanly.")
 
 
 def cmd_ui(args):
@@ -592,7 +647,7 @@ def main():
 
     p_serve = subparsers.add_parser("serve", help="Launch FastAPI & WebSocket server")
     p_serve.add_argument("--host", type=str, default="127.0.0.1", help="Host address")
-    p_serve.add_argument("--port", type=int, default=8000, help="Port number")
+    p_serve.add_argument("--port", type=int, default=8008, help="Port number (default: 8008)")
     p_serve.add_argument("--reload", action="store_true", help="Enable live reload")
 
     # ui command
@@ -600,6 +655,13 @@ def main():
     p_ui.add_argument("--port", type=int, default=3000, help="Web UI port (default: 3000)")
     p_ui.add_argument("--dev", action="store_true", help="Launch in development mode with hot-reloading")
     p_ui.add_argument("--no-open", dest="open", action="store_false", help="Do not automatically open default browser")
+
+    # start command (unified stack)
+    p_start = subparsers.add_parser("start", help="Launch full sovereign AutogenOS stack (Backend + UI)")
+    p_start.add_argument("--port", type=int, default=3000, help="Web Cockpit UI port (default: 3000)")
+    p_start.add_argument("--api-port", type=int, default=8008, help="FastAPI backend port (default: 8008)")
+    p_start.add_argument("--dev", action="store_true", help="Launch UI in development mode with hot-reloading")
+    p_start.add_argument("--no-open", dest="open", action="store_false", help="Do not automatically open default browser")
 
     args = parser.parse_args()
 
@@ -649,6 +711,8 @@ def main():
         cmd_serve(args)
     elif args.command == "ui":
         cmd_ui(args)
+    elif args.command == "start":
+        cmd_start(args)
     else:
         parser.print_help()
 

@@ -24,3 +24,15 @@ def test_cmd_ui_invocation_flow():
         called_cmd = mock_subproc.call_args[0][0]
         assert "npm.cmd" in called_cmd[0]
         assert "start" in called_cmd
+
+
+def test_cli_start_command_parsing():
+    """Verify 'start' subcommand arguments parse cleanly."""
+    with patch("sys.argv", ["autogenos", "start", "--port", "3000", "--api-port", "8008", "--no-open"]):
+        with patch("autogenos.cli.main.cmd_start") as mock_cmd_start:
+            main()
+            assert mock_cmd_start.called
+            args = mock_cmd_start.call_args[0][0]
+            assert args.port == 3000
+            assert args.api_port == 8008
+            assert args.open is False

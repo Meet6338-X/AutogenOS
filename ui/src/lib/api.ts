@@ -7,32 +7,43 @@ import {
   MeetJoinResult,
 } from './types';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const CANDIDATE_URLS = [
+  process.env.NEXT_PUBLIC_API_URL,
+  'http://127.0.0.1:8008',
+  'http://127.0.0.1:8000',
+].filter(Boolean) as string[];
+
+let activeBaseUrl = CANDIDATE_URLS[0] || 'http://127.0.0.1:8008';
 
 async function safeFetch<T>(endpoint: string, options?: RequestInit, fallback?: () => T): Promise<T> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  const tryUrls = [activeBaseUrl, ...CANDIDATE_URLS.filter((u) => u !== activeBaseUrl)];
+
+  for (const baseUrl of tryUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(baseUrl + endpoint, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        activeBaseUrl = baseUrl;
+        return (await res.json()) as T;
+      }
+    } catch {
+      // Continue to next candidate URL
     }
-    return (await res.json()) as T;
-  } catch (err) {
-    if (fallback) {
-      console.warn(`[AutogenOS API] Backend unavailable at ${endpoint}, using client fallback:`, err);
-      return fallback();
-    }
-    throw err;
   }
+
+  if (fallback) {
+    return fallback();
+  }
+  throw new Error("[AutogenOS API] All backend endpoints failed for " + endpoint);
 }
 
 export const api = {
