@@ -86,7 +86,7 @@ def test_api_explore(client):
 
 
 def test_api_orchestrator_run(client):
-    payload = {"intent": "Open calc and compute checksum"}
+    payload = {"intent": "Echo health check and compute checksum"}
     res = client.post("/api/v1/orchestrator/run", json=payload)
     assert res.status_code == 200
     data = res.json()
