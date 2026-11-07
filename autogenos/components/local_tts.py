@@ -42,15 +42,20 @@ class LocalTTS:
                 logger.warning(f"Could not initialize SAPI.SpVoice: {e}")
 
     def speak(self, text: str, asynchronous: bool = True) -> bool:
-        """Speaks text directly through local audio speakers."""
+        """Speaks text directly through local audio speakers with per-thread COM apartment initialization."""
         if not text or not text.strip():
             return False
 
-        if self._sapi_voice:
+        if self.is_windows:
             try:
-                # SVSFlagsAsync = 1, SVSFDefault = 0
+                import pythoncom
+                import win32com.client
+                pythoncom.CoInitialize()
+                voice = win32com.client.Dispatch("SAPI.SpVoice")
+                voice.Rate = self.speech_rate
+                voice.Volume = self.volume
                 flags = 1 if asynchronous else 0
-                self._sapi_voice.Speak(text, flags)
+                voice.Speak(text, flags)
                 return True
             except Exception as e:
                 logger.error(f"SAPI speak error: {e}")
@@ -60,10 +65,13 @@ class LocalTTS:
 
     def stop(self) -> None:
         """Immediately halts ongoing speech output (barge-in interruption)."""
-        if self._sapi_voice:
+        if self.is_windows:
             try:
-                # SVSFPurgeBeforeSpeak = 2
-                self._sapi_voice.Speak("", 2)
+                import pythoncom
+                import win32com.client
+                pythoncom.CoInitialize()
+                voice = win32com.client.Dispatch("SAPI.SpVoice")
+                voice.Speak("", 2)
             except Exception:
                 pass
 

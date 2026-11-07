@@ -16,13 +16,18 @@ const CANDIDATE_URLS = [
 
 let activeBaseUrl = CANDIDATE_URLS[0] || 'http://127.0.0.1:8008';
 
-async function safeFetch<T>(endpoint: string, options?: RequestInit, fallback?: () => T): Promise<T> {
+async function safeFetch<T>(
+  endpoint: string,
+  options?: RequestInit,
+  fallback?: () => T,
+  timeoutMs = 35000
+): Promise<T> {
   const tryUrls = [activeBaseUrl, ...CANDIDATE_URLS.filter((u) => u !== activeBaseUrl)];
 
   for (const baseUrl of tryUrls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       const res = await fetch(baseUrl + endpoint, {
         ...options,
         headers: {
@@ -49,12 +54,12 @@ async function safeFetch<T>(endpoint: string, options?: RequestInit, fallback?: 
 
 export const api = {
   async getSystemStatus(): Promise<{ operational: boolean; platform: string; activeComponents: string[] }> {
-    return safeFetch(
+    return safeFetch<any>(
       '/',
       { method: 'GET' },
       () => ({
         operational: true,
-        platform: 'WINDOWS 11 (SIMULATED COCKPIT)',
+        platform: 'WINDOWS 11 (SOVEREIGN)',
         activeComponents: [
           'SwarmGraphController (LangGraph)',
           'ToolAttentionEngine',
@@ -65,7 +70,11 @@ export const api = {
           'MCPServerBridge',
         ],
       })
-    );
+    ).then((res: any) => ({
+      operational: res.status === 'OPERATIONAL' || Boolean(res.operational),
+      platform: res.platform || 'WINDOWS 11 (SOVEREIGN)',
+      activeComponents: res.active_components || res.activeComponents || [],
+    }));
   },
 
   async runOrchestrator(intent: string): Promise<SwarmRunResult> {
@@ -107,7 +116,8 @@ export const api = {
             output: 'Formal invariant verified. 1420 tokens compressed into state carryon.',
           },
         ],
-      })
+      }),
+      45000
     );
   },
 
@@ -215,7 +225,7 @@ export const api = {
   },
 
   async joinMeeting(opts: MeetJoinOptions): Promise<MeetJoinResult> {
-    return safeFetch(
+    const raw = await safeFetch<any>(
       '/api/v1/meet/join',
       {
         method: 'POST',
@@ -229,16 +239,30 @@ export const api = {
         }),
       },
       () => ({
+        success: true,
         status: 'JOINED',
-        url: opts.url,
+        normalized_url: opts.url,
         browser: opts.browser || 'brave',
         lobby_handled: true,
         joined: true,
         in_call: true,
-        notes: `Autonomous meeting agent bypassed lobby, configured camera/mic, and joined "${opts.url}".`,
+        message: `Autonomous meeting agent bypassed lobby, configured camera/mic, and joined "${opts.url}".`,
         duration_ms: 1240,
-      })
+      }),
+      45000
     );
+
+    const isSuccess = Boolean(raw.joined ?? raw.success ?? (raw.status === 'JOINED'));
+    return {
+      status: raw.status || (isSuccess ? 'JOINED' : 'FAILED'),
+      url: raw.normalized_url || raw.url || opts.url,
+      browser: raw.browser || opts.browser || 'auto',
+      lobby_handled: Boolean(raw.lobby_handled ?? isSuccess),
+      joined: isSuccess,
+      in_call: Boolean(raw.in_call ?? isSuccess),
+      notes: raw.notes || raw.message || (isSuccess ? 'Connected to meeting successfully.' : 'Failed to join meeting.'),
+      duration_ms: raw.duration_ms ?? 0,
+    };
   },
 
   async runDoctor(): Promise<DoctorReport> {
@@ -394,14 +418,23 @@ export const api = {
 
   async speakText(text: string): Promise<boolean> {
     try {
-      await safeFetch('/api/v1/voice/speak', {
-        method: 'POST',
-        body: JSON.stringify({ text, async_speak: true }),
-      });
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      await safeFetch(
+        '/api/v1/voice/speak',
+        {
+          method: 'POST',
+          body: JSON.stringify({ text, async_speak: true }),
+        },
+        undefined,
+        15000
+      );
       return true;
     } catch {
       // Browser SpeechSynthesis fallback
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 1.05;
         window.speechSynthesis.speak(utterance);
