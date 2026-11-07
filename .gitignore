@@ -31,3 +31,9 @@ htmlcov/
 
 # AutogenOS ephemeral worktrees, runtime sandboxes, trajectories & datasets
 .autogenos/
+
+# Next.js UI
+ui/.next/
+ui/node_modules/
+ui/out/
+!ui/src/lib/
