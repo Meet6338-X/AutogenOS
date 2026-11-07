@@ -82,3 +82,13 @@ export interface MeetJoinResult {
   notes: string;
   duration_ms: number;
 }
+
+
+export interface LiveKitConnectionInfo {
+  url: string;
+  room_name: string;
+  identity: string;
+  token: string;
+  mode: string;
+  server_active: boolean;
+}

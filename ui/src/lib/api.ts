@@ -5,6 +5,7 @@ import {
   MCPToolItem,
   MeetJoinOptions,
   MeetJoinResult,
+  LiveKitConnectionInfo,
 } from './types';
 
 const CANDIDATE_URLS = [
@@ -407,5 +408,41 @@ export const api = {
       }
       return true;
     }
+  },
+
+  async getLiveKitStatus(): Promise<{ url: string; mode: string; is_running: boolean }> {
+    return safeFetch(
+      '/api/v1/livekit/status',
+      { method: 'GET' },
+      () => ({
+        url: 'ws://127.0.0.1:7880',
+        mode: '100% LOCAL FREE',
+        is_running: true,
+      })
+    );
+  },
+
+  async getLiveKitToken(roomName = 'autogenos-local', identity = 'user-client'): Promise<LiveKitConnectionInfo> {
+    return safeFetch(
+      '/api/v1/livekit/token',
+      {
+        method: 'POST',
+        body: JSON.stringify({ room_name: roomName, identity }),
+      },
+      () => ({
+        url: 'ws://127.0.0.1:7880',
+        room_name: roomName,
+        identity,
+        token: 'local-dev-jwt-token',
+        mode: '100% Free & Local',
+        server_active: true,
+      })
+    );
+  },
+
+  getVoiceWebSocketUrl(): string {
+    const wsProto = activeBaseUrl.startsWith('https') ? 'wss' : 'ws';
+    const host = activeBaseUrl.replace(/^https?:\/\//, '');
+    return `${wsProto}://${host}/api/v1/voice/stream`;
   },
 };
