@@ -23,6 +23,7 @@ from autogenos.blocks.standard import (
     SystemDoctorBlock,
     BenchmarkEvalBlock,
     NotificationAlertBlock,
+    MeetingJoinerBlock,
 )
 
 logger = logging.getLogger("autogenos.blocks")
@@ -48,6 +49,7 @@ class BlockManager:
             SystemDoctorBlock(),
             BenchmarkEvalBlock(),
             NotificationAlertBlock(),
+            MeetingJoinerBlock(),
         ]
         for b in standard_blocks:
             self.registry.register(b)

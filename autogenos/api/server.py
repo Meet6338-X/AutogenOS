@@ -548,6 +548,31 @@ async def execute_block_endpoint(block_id: str, req: BlockExecuteRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+class MeetJoinRequest(BaseModel):
+    url: str
+    display_name: str = "Meet Shah"
+    mute_mic: bool = True
+    disable_camera: bool = False
+    auto_join: bool = True
+    browser: str = "auto"
+
+
+@app.post("/api/v1/meet/join")
+async def api_meet_join(req: MeetJoinRequest):
+    """Autonomously connects to and joins Google Meet, Zoom, or Teams sessions."""
+    from autogenos.components.meeting_agent import MeetingAgent, MeetingConfig
+    cfg = MeetingConfig(
+        url=req.url,
+        display_name=req.display_name,
+        mute_mic=req.mute_mic,
+        disable_camera=req.disable_camera,
+        auto_join=req.auto_join,
+        browser=req.browser
+    )
+    res = await MeetingAgent.join_meeting_fast(cfg)
+    return res.model_dump()
+
+
 @app.websocket("/api/v1/voice/stream")
 async def websocket_voice_stream(websocket: WebSocket):
     """Sub-500ms real-time voice streaming WebSocket."""
