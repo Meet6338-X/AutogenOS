@@ -430,6 +430,38 @@ def cmd_serve(args):
     uvicorn.run("autogenos.api.server:app", host=args.host, port=args.port, reload=args.reload)
 
 
+def cmd_ui(args):
+    """Launches or opens the Next.js Cockpit Web UI with LiveKit Voice HUD."""
+    import subprocess
+    import webbrowser
+    import shutil
+    from pathlib import Path
+
+    port = getattr(args, "port", 3000)
+    dev = getattr(args, "dev", False)
+    ui_dir = Path(__file__).resolve().parent.parent.parent / "ui"
+    
+    print("\n" + "=" * 65)
+    print("  AutogenOS Sovereign Web Cockpit & LiveKit Voice HUD")
+    print(f"  Target URL:   http://localhost:{port}")
+    print(f"  UI Directory: {ui_dir}")
+    print("=" * 65 + "\n")
+
+    npm_bin = shutil.which("npm.cmd") or shutil.which("npm") or "npm"
+    cmd = [npm_bin, "run", "dev", "--", "-p", str(port)] if dev else [npm_bin, "start", "--", "-p", str(port)]
+    
+    if getattr(args, "open", True):
+        webbrowser.open(f"http://localhost:{port}")
+        
+    try:
+        subprocess.run(cmd, cwd=str(ui_dir), check=True)
+    except KeyboardInterrupt:
+        print("\n[+] UI server stopped.")
+    except Exception as e:
+        print(f"\n[!] Note: {e}")
+        print("    You can run manually: cd ui && npm.cmd run dev")
+
+
 def main():
     print_banner()
     parser = argparse.ArgumentParser(description="AutogenOS Swarm CLI")
@@ -563,6 +595,12 @@ def main():
     p_serve.add_argument("--port", type=int, default=8000, help="Port number")
     p_serve.add_argument("--reload", action="store_true", help="Enable live reload")
 
+    # ui command
+    p_ui = subparsers.add_parser("ui", help="Launch Next.js 16 Web Cockpit & LiveKit Voice HUD")
+    p_ui.add_argument("--port", type=int, default=3000, help="Web UI port (default: 3000)")
+    p_ui.add_argument("--dev", action="store_true", help="Launch in development mode with hot-reloading")
+    p_ui.add_argument("--no-open", dest="open", action="store_false", help="Do not automatically open default browser")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -609,6 +647,8 @@ def main():
         cmd_meet(args)
     elif args.command == "serve":
         cmd_serve(args)
+    elif args.command == "ui":
+        cmd_ui(args)
     else:
         parser.print_help()
 
