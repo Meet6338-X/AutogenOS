@@ -47,6 +47,7 @@ class InteractiveCockpitREPL:
     /doctor        Run complete system diagnostics & bridge health check
     /eval          Run empirical benchmark suites (OSWorld, Agent-Diff)
     /train         Launch local LoRA/DPO model fine-tuning pass
+    /meet <url>    Autonomous Google Meet, Zoom, or Teams joiner
     /blocks        List registered modular feature blocks
     /tools         List all native MCP tools (JSON-RPC 2.0)
     /status        Display host OS active window focus & accessibility
@@ -64,6 +65,7 @@ Available Slash Commands:
   /doctor          - Inspect Python, OS, Git long paths, CDP browser, and MCP tools
   /eval [suite]    - Run empirical benchmarks (osworld, agent-diff, tool-attention, all)
   /train [mode]    - Compile or execute local LoRA/DPO adapter pass
+  /meet <url>      - Autonomous Google Meet, Zoom, or Teams joiner
   /blocks          - List and inspect registered modular feature blocks
   /tools           - Display active MCP tools catalog
   /status          - Host OS window title and accessibility tree status
@@ -135,6 +137,19 @@ Available Slash Commands:
                 res = self.self_trainer.train_local_adapter(config=cfg)
                 print(f"\n[+] Fine-Tuning Completed [{res.mode}]: Loss {res.initial_loss:.4f} -> {res.final_loss:.4f}")
                 print(f"    Adapter: {res.output_adapter_dir}\n")
+            elif cmd_lower.startswith("/meet"):
+                parts = user_input.split(maxsplit=1)
+                if len(parts) < 2:
+                    print("[!] Usage: /meet <meeting_url>")
+                else:
+                    url = parts[1].strip()
+                    from autogenos.components.meeting_agent import MeetingAgent, MeetingConfig
+                    cfg = MeetingConfig(url=url, auto_join=True, mute_mic=True)
+                    print(f"\n[+] Connecting to meeting: {url}...")
+                    res = await MeetingAgent.join_meeting_fast(cfg)
+                    st = "[SUCCESS]" if res.success else "[FAILED]"
+                    print(f"  {st} {res.platform.value.upper()} ({res.meeting_id}) | Status: {res.status}")
+                    print(f"  {res.message}\n")
             elif cmd_lower == "/blocks":
                 blocks = self.block_manager.list_blocks()
                 print(f"\n[+] Registered Feature Blocks ({len(blocks)} active):")

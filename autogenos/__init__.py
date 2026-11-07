@@ -1,3 +1,9 @@
+from autogenos.components.meeting_agent import (
+    MeetingAgent,
+    MeetingConfig,
+    MeetingPlatform,
+    MeetingJoinResult,
+)
 from autogenos.blocks import (
     BlockType,
     BlockStatus,
@@ -202,4 +208,9 @@ __all__ = [
     "block",
     "BlockRegistry",
     "BlockManager",
+    # Autonomous Meeting Agent
+    "MeetingAgent",
+    "MeetingConfig",
+    "MeetingPlatform",
+    "MeetingJoinResult",
 ]

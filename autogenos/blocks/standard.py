@@ -190,3 +190,37 @@ class NotificationAlertBlock(BaseBlock):
             webhook_url=webhook_url
         )
         return {"dispatched": True, "results": res}
+
+
+class MeetingJoinerBlock(BaseBlock):
+    """Autonomous meeting connector that parses, launches, and joins Google Meet, Zoom, or Teams sessions."""
+
+    def __init__(self):
+        super().__init__(
+            block_id="actions.meeting.joiner",
+            block_type=BlockType.ACTION,
+            name="Meeting Joiner Block",
+            description="Autonomous meeting connector that joins Google Meet, Zoom, or Teams calls.",
+            tags=["action", "meeting", "google-meet", "zoom", "teams"]
+        )
+
+    async def execute(
+        self,
+        url: str,
+        display_name: str = "Meet Shah",
+        mute_mic: bool = True,
+        disable_camera: bool = False,
+        auto_join: bool = True,
+        browser: str = "auto"
+    ) -> Dict[str, Any]:
+        from autogenos.components.meeting_agent import MeetingAgent, MeetingConfig
+        cfg = MeetingConfig(
+            url=url,
+            display_name=display_name,
+            mute_mic=mute_mic,
+            disable_camera=disable_camera,
+            auto_join=auto_join,
+            browser=browser
+        )
+        res = await MeetingAgent.join_meeting_fast(cfg)
+        return res.model_dump()

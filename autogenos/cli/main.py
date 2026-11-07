@@ -402,6 +402,28 @@ def cmd_blocks(args):
         except Exception as e:
             print(f"[!] Execution error: {e}")
 
+def cmd_meet(args):
+    from autogenos.components.meeting_agent import MeetingAgent, MeetingConfig
+    url = args.url
+    print(f"\n[+] Connecting to meeting: {url}")
+    cfg = MeetingConfig(
+        url=url,
+        display_name=getattr(args, "name", "Meet Shah"),
+        mute_mic=not getattr(args, "unmute", False),
+        disable_camera=getattr(args, "no_camera", False),
+        auto_join=True,
+        browser=getattr(args, "browser", "auto")
+    )
+    res = asyncio.run(MeetingAgent.join_meeting_fast(cfg))
+    status_tag = "SUCCESS" if res.success else "FAILED"
+    print(f"    Platform:    {res.platform.value.upper()}")
+    print(f"    Meeting ID:  {res.meeting_id}")
+    print(f"    Target URL:  {res.normalized_url}")
+    print(f"    Status:      [{status_tag}] {res.status}")
+    print(f"    Duration:    {res.duration_ms:.1f}ms")
+    print(f"    Details:     {res.message}\n")
+
+
 def cmd_serve(args):
     import uvicorn
     print(f"\n[+] Launching AutogenOS FastAPI & WebSocket Server on http://{args.host}:{args.port}")
@@ -528,6 +550,14 @@ def main():
     p_bexec.add_argument("block_id", type=str, help="Block identifier to execute")
     p_bexec.add_argument("--args", type=str, default="{}", help="Execution arguments as JSON string")
 
+        # meet command
+    p_meet = subparsers.add_parser("meet", help="Autonomous Google Meet, Zoom, and Teams connector & joiner")
+    p_meet.add_argument("url", type=str, help="Meeting URL to join")
+    p_meet.add_argument("--name", type=str, default="Meet Shah", help="Display name for guest lobbies")
+    p_meet.add_argument("--unmute", action="store_true", help="Leave microphone active (default is muted)")
+    p_meet.add_argument("--no-camera", action="store_true", help="Disable camera upon entering")
+    p_meet.add_argument("--browser", type=str, default="auto", choices=["auto", "brave", "chrome", "edge"], help="Browser to launch")
+
     p_serve = subparsers.add_parser("serve", help="Launch FastAPI & WebSocket server")
     p_serve.add_argument("--host", type=str, default="127.0.0.1", help="Host address")
     p_serve.add_argument("--port", type=int, default=8000, help="Port number")
@@ -575,6 +605,8 @@ def main():
         cmd_notify(args)
     elif args.command == "blocks":
         cmd_blocks(args)
+    elif args.command == "meet":
+        cmd_meet(args)
     elif args.command == "serve":
         cmd_serve(args)
     else:

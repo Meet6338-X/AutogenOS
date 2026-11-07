@@ -22,6 +22,7 @@ from autogenos.blocks.standard import (
     SystemDoctorBlock,
     BenchmarkEvalBlock,
     NotificationAlertBlock,
+    MeetingJoinerBlock,
 )
 
 __all__ = [
@@ -40,4 +41,5 @@ __all__ = [
     "SystemDoctorBlock",
     "BenchmarkEvalBlock",
     "NotificationAlertBlock",
+    "MeetingJoinerBlock",
 ]
